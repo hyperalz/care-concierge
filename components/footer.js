@@ -47,7 +47,7 @@ class CustomFooter extends HTMLElement {
                     <div class="border-t border-gray-700 mt-8 pt-8">
                         <div class="flex flex-col md:flex-row justify-between items-center">
                             <p class="text-gray-400 text-sm">
-                                © 2024 CareConcierge. All rights reserved.
+                                © 2025 CareConcierge. All rights reserved.
                             </p>
                             <div class="flex space-x-6 mt-4 md:mt-0">
                                 <a href="#" class="text-gray-400 hover:text-indigo-400 text-sm transition duration-300">Privacy</a>
