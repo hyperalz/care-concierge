@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareConcierge Navigator | Integrated Elderly Care Solution</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.globe.min.js"></script>
+    
+    <!-- Contact Form Modal -->
+    <div id="contactModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-2xl max-w-md w-full p-8 relative">
+                <button id="closeModal" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                    <i data-feather="x" class="w-6 h-6"></i>
+                </button>
+                
+                <div class="text-center mb-6">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">Book your free consultation</h3>
+                    <p class="text-gray-600">Let's discuss how we can help your family</p>
+                </div>
+                
+                <form id="contactForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Full name</label>
+                        <input type="text" name="name" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email address</label>
+                        <input type="email" name="email" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Phone number</label>
+                        <input type="tel" name="phone" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Interested plan</label>
+                        <select name="plan" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="">Select a plan</option>
+                            <option value="digital-hub">Digital care hub (£29/month)</option>
+                            <option value="essential-care">Essential care (£149/month)</option>
+                            <option value="preferred-care">Preferred care (£179/month)</option>
+                            <option value="comprehensive-care">Comprehensive care (£229/month)</option>
+                            <option value="not-sure">Not sure yet</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tell us about your situation</label>
+                        <textarea name="message" rows="3" placeholder="Briefly describe your current care needs..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <input type="checkbox" name="consent" required class="mr-2">
+                        <label class="text-sm text-gray-600">I agree to be contacted about care coordination services</label>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium transition duration-300">
+                        Book free consultation
+                    </button>
+                </form>
+                
+                <p class="text-xs text-gray-500 text-center mt-4">
+                    We'll contact you within 24 hours to schedule your consultation
+                </p>
+            </div>
+        </div>
+    </div>
+</head>
+<body class="bg-gray-50">
+    <custom-navbar></custom-navbar>
+    <!-- Hero Section -->
+    <div class="hero-bg">
+        <div class="hero-content">
+            <h1 class="text-5xl md:text-7xl font-bold mb-6 leading-tight text-white">Reclaim your life beyond caregiving</h1>
+            <p class="text-xl md:text-2xl mb-8 leading-relaxed text-white">Get back your evenings, your weekends, and your peace of mind. We handle the care coordination so you can rediscover what makes you, you.</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="#how-it-works" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-lg font-medium transition duration-300 shadow-lg hover:shadow-xl">
+                    See How It Works
+                </a>
+                <a href="#contact" class="bg-white hover:bg-gray-100 text-indigo-600 px-8 py-4 rounded-lg font-medium transition duration-300 shadow-lg hover:shadow-xl">
+                    Book Free Consultation
+                </a>
+            </div>
+        </div>
+    </div>
+<!-- Value Proposition -->
+    <section class="py-20 px-4">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">The care gap solved</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">We combine human expertise with smart technology to fill the gaps in elderly care coordination</p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition duration-300">
+                    <i data-feather="shield" class="w-12 h-12 text-indigo-500 mb-4"></i>
+                    <h3 class="text-xl font-bold mb-3 text-gray-800">Safety first</h3>
+                    <p class="text-gray-600">24/7 monitoring with emergency response and daily check-ins</p>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition duration-300">
+                    <i data-feather="users" class="w-12 h-12 text-indigo-500 mb-4"></i>
+                    <h3 class="text-xl font-bold mb-3 text-gray-800">One point of contact</h3>
+                    <p class="text-gray-600">Your dedicated care concierge manages all providers and logistics</p>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition duration-300">
+                    <i data-feather="pie-chart" class="w-12 h-12 text-indigo-500 mb-4"></i>
+                    <h3 class="text-xl font-bold mb-3 text-gray-800">Transparent pricing</h3>
+                    <p class="text-gray-600">Simple monthly subscription with no hidden costs</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section id="how-it-works" class="py-20 bg-gray-100 px-4">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-16">How CareConcierge works</h2>
+            
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <div class="mb-8">
+                        <div class="flex items-start mb-4">
+                            <div class="bg-indigo-100 text-indigo-600 font-bold rounded-full w-10 h-10 flex items-center justify-center mr-4">1</div>
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800 mb-2">Initial assessment</h3>
+                                <p class="text-gray-600">We meet with your family to understand needs, routines and preferences</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-8">
+                        <div class="flex items-start mb-4">
+                            <div class="bg-indigo-100 text-indigo-600 font-bold rounded-full w-10 h-10 flex items-center justify-center mr-4">2</div>
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800 mb-2">Smart home setup</h3>
+                                <p class="text-gray-600">We install non-intrusive sensors and emergency response system</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-8">
+                        <div class="flex items-start mb-4">
+                            <div class="bg-indigo-100 text-indigo-600 font-bold rounded-full w-10 h-10 flex items-center justify-center mr-4">3</div>
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800 mb-2">Care coordination</h3>
+                                <p class="text-gray-600">Your personal concierge arranges and manages all care services</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="flex items-start mb-4">
+                            <div class="bg-indigo-100 text-indigo-600 font-bold rounded-full w-10 h-10 flex items-center justify-center mr-4">4</div>
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800 mb-2">Ongoing support</h3>
+                                <p class="text-gray-600">Regular updates and 24/7 emergency monitoring for peace of mind</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1024&q=80" alt="Caring for elderly parents" class="rounded-lg mb-6 w-full">
+<div class="flex items-center">
+                        <i data-feather="check-circle" class="w-6 h-6 text-green-500 mr-2"></i>
+                        <span class="text-gray-700">Non-medical personal care coordination</span>
+                    </div>
+                    <div class="flex items-center mt-3">
+                        <i data-feather="check-circle" class="w-6 h-6 text-green-500 mr-2"></i>
+                        <span class="text-gray-700">Home safety assessments</span>
+                    </div>
+                    <div class="flex items-center mt-3">
+                        <i data-feather="check-circle" class="w-6 h-6 text-green-500 mr-2"></i>
+                        <span class="text-gray-700">Medication reminders</span>
+                    </div>
+                    <div class="flex items-center mt-3">
+                        <i data-feather="check-circle" class="w-6 h-6 text-green-500 mr-2"></i>
+                        <span class="text-gray-700">Transportation arrangements</span>
+                    </div>
+                    <div class="flex items-center mt-3">
+                        <i data-feather="check-circle" class="w-6 h-6 text-green-500 mr-2"></i>
+                        <span class="text-gray-700">Household management</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="py-20 px-4">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-16">What families say</h2>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold mr-4">JD</div>
+                        <div>
+                            <h4 class="font-bold">Jane D.</h4>
+                            <p class="text-gray-500 text-sm">Daughter of client</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 italic">"As an only child living abroad, CareConcierge gives me peace of mind knowing my mum has someone checking in daily and coordinating all her needs."</p>
+                    <div class="flex mt-4">
+                        <i data-feather="star" class="w-4 h-4 text-yellow-400 fill-current"></i>
+                        <i data-feather="star" class="w-4 h-4 text-yellow-400 fill-current"></i>
+                        <i data-feather="star" class="w-4 h-4 text-yellow-400 fill-current"></i>
+                        <i data-feather="star" class="w-4 h-4 text-yellow-400 fill-current"></i>
+                        <i data-feather="star" class="w-4 h-4 text-yellow-400 fill-current"></i>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold mr-4">MS</div>
+                        <div>
+                            <h4 class="font-bold">Michael S.</h4>
+                            <p class="text-gray-500 text-sm">Son of client</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 italic">"Before CareConcierge, I was spending 15+ hours a week managing dad's care. Now I get one weekly update and can focus on quality time together."</p>
+                    <div class="flex mt-4">
+                        <i data-feather="star" class="w-4 h-4 text-yellow-400 fill-current"></i>
+                        <i data-feather="star" class="w-4 h-4 text-yellow-400 fill-current"></i>
+                        <i data-feather="star" class="w-4 h-4 text-yellow-400 fill-current"></i>
+                        <i data-feather="star" class="w-4 h-4 text-yellow-400 fill-current"></i>
+                        <i data-feather="star" class="w-4 h-4 text-yellow-400 fill-current"></i>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold mr-4">EP</div>
+                        <div>
+                            <h4 class="font-bold">Elizabeth P.</h4>
+                            <p class="text-gray-500 text-sm">Client</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 italic">"I value my independence but needed help coordinating everything. My Care Concierge knows my preferences and makes sure things are done my way."</p>
+                    <div class="flex mt-4">
+                        <i data-feather="star" class="w-4 h-4 text-yellow-400 fill-current"></i>
+                        <i data-feather="star" class="w-4 h-4 text-yellow-400 fill-current"></i>
+                        <i data-feather="star" class="w-4 h-4 text-yellow-400 fill-current"></i>
+                        <i data-feather="star" class="w-4 h-4 text-yellow-400 fill-current"></i>
+                        <i data-feather="star" class="w-4 h-4 text-yellow-400 fill-current"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Pricing -->
+    <section class="py-20 px-4">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-4">Care coordination plans for every family & budget</h2>
+            <p class="text-xl text-gray-600 text-center mb-16 max-w-3xl mx-auto">Choose the level of support that fits your family's needs and budget</p>
+            
+            <div class="grid lg:grid-cols-4 md:grid-cols-2 gap-6 items-stretch">
+                <!-- Tier 1 -->
+                <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col">
+                    <div class="p-6 flex flex-col flex-grow">
+                        <div class="text-center mb-6">
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">Digital care hub</h3>
+                            <div class="text-3xl font-bold text-indigo-600 mb-1">£29</div>
+                            <div class="text-sm text-gray-500 mb-3">per month</div>
+                            <div class="text-xs text-green-600 font-medium bg-green-50 px-3 py-1 rounded-full inline-block">No commitment • Cancel anytime</div>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-6 text-center">For families who need organization and resources</p>
+                        
+                        <div class="space-y-3 mb-8 flex-grow">
+                            <div class="flex items-start">
+                                <i data-feather="check" class="w-4 h-4 text-green-500 mr-3 mt-0.5 flex-shrink-0"></i>
+                                <span class="text-sm text-gray-700">Digital care dashboard & calendar</span>
+                            </div>
+                            <div class="flex items-start">
+                                <i data-feather="check" class="w-4 h-4 text-green-500 mr-3 mt-0.5 flex-shrink-0"></i>
+                                <span class="text-sm text-gray-700">Secure document vault (NHS letters, POA, care plans)</span>
+                            </div>
+                            <div class="flex items-start">
+                                <i data-feather="check" class="w-4 h-4 text-green-500 mr-3 mt-0.5 flex-shrink-0"></i>
+                                <span class="text-sm text-gray-700">UK care resource library</span>
+                            </div>
+                            <div class="flex items-start">
+                                <i data-feather="check" class="w-4 h-4 text-green-500 mr-3 mt-0.5 flex-shrink-0"></i>
+                                <span class="text-sm text-gray-700">Vetted provider directory</span>
+                            </div>
+                            <div class="flex items-start">
+                                <i data-feather="check" class="w-4 h-4 text-green-500 mr-3 mt-0.5 flex-shrink-0"></i>
+                                <span class="text-sm text-gray-700">Basic check-in reminders</span>
+                            </div>
+                            <div class="flex items-start">
+                                <i data-feather="check" class="w-4 h-4 text-green-500 mr-3 mt-0.5 flex-shrink-0"></i>
+                                <span class="text-sm text-gray-700">Email support</span>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                            <p class="text-xs text-gray-600 font-medium">Perfect for:</p>
+                            <p class="text-xs text-gray-600">Getting organized, accessing resources, and understanding available support</p>
+                        </div>
+                        
+                        <button onclick="toggleDetails('digital-hub')" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition duration-300 text-center block mb-4 text-sm">
+                            <span id="digital-hub-toggle">View Full Details</span>
+                            <i data-feather="chevron-down" class="w-4 h-4 inline ml-1" id="digital-hub-icon"></i>
+                        </button>
+                        
+                        <div id="digital-hub-details" class="hidden mb-6">
+                            <div class="bg-white border border-gray-200 rounded-lg p-4 text-sm">
+                                <h4 class="font-semibold text-gray-800 mb-3">Your Family's Care Command Centre</h4>
+                                <p class="text-gray-600 mb-4">Stop juggling spreadsheets, sticky notes, and group texts. Get every detail of your parent's care organised in one secure, simple-to-use platform.</p>
+                                
+                                <div class="space-y-3">
+                                    <div>
+                                        <h5 class="font-medium text-gray-700">The Unified Care Calendar</h5>
+                                        <p class="text-gray-600 text-xs">See everything in one place. Colour-coded entries for GP appointments, carer visits, family check-ins, and even the handyman's schedule.</p>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-medium text-gray-700">The Digital Document Vault</h5>
+                                        <p class="text-gray-600 text-xs">Securely store and find everything instantly: NHS letters, Power of Attorney documents, care plans, and insurance details.</p>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-medium text-gray-700">Your Vetted Provider Directory</h5>
+                                        <p class="text-gray-600 text-xs">Find, compare, and contact our network of trusted local helpers—from cleaners to companion carers—all in one place.</p>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-medium text-gray-700">The UK Care Resource Library</h5>
+                                        <p class="text-gray-600 text-xs">Step-by-step guides on applying for Attendance Allowance, navigating social services assessments, and understanding your rights.</p>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-medium text-gray-700">Smart Check-in Reminders</h5>
+                                        <p class="text-gray-600 text-xs">Set automated reminders to call your parent, ensuring those vital daily connections never get lost.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <a href="/contact.html" class="w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-600 px-4 py-3 rounded-lg font-medium transition duration-300 text-center block">
+                            Get Started
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Tier 2 -->
+                <div class="bg-white rounded-2xl shadow-lg border-2 border-indigo-200 overflow-hidden hover:shadow-xl transition-all duration-300 relative flex flex-col">
+                    <div class="absolute top-0 right-0 bg-indigo-600 text-white px-4 py-1 rounded-bl-lg text-xs font-medium">Most Popular</div>
+                    <div class="p-6 flex flex-col flex-grow">
+                        <div class="text-center mb-6">
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">Essential care</h3>
+                            <div class="text-3xl font-bold text-indigo-600 mb-1">£149</div>
+                            <div class="text-sm text-gray-500 mb-3">per month</div>
+                            <div class="text-xs text-orange-600 font-medium bg-orange-50 px-3 py-1 rounded-full inline-block">6-month commitment</div>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-6 text-center">Reliable basic support for routine care needs</p>
+                        
+                        <div class="space-y-3 mb-8 flex-grow">
+                            <div class="flex items-start">
+                                <i data-feather="check" class="w-4 h-4 text-green-500 mr-3 mt-0.5 flex-shrink-0"></i>
+                                <span class="text-sm text-gray-700"><strong>Everything in Digital Hub, PLUS:</strong></span>
+                            </div>
+                            <div class="flex items-start">
+                                <i data-feather="check" class="w-4 h-4 text-green-500 mr-3 mt-0.5 flex-shrink-0"></i>
+                                <span class="text-sm text-gray-700">Your dedicated Care Guide</span>
+                            </div>
+                            <div class="flex items-start">
+                                <i data-feather="check" class="w-4 h-4 text-green-500 mr-3 mt-0.5 flex-shrink-0"></i>
+                                <span class="text-sm text-gray-700">10 coordination tasks per month</span>
+                            </div>
+                            <div class="flex items-start">
+                                <i data-feather="check" class="w-4 h-4 text-green-500 mr-3 mt-0.5 flex-shrink-0"></i>
+                                <span class="text-sm text-gray-700">Weekly wellbeing check-in calls</span>
+                            </div>
+                            <div class="flex items-start">
+                                <i data-feather="check" class="w-4 h-4 text-green-500 mr-3 mt-0.5 flex-shrink-0"></i>
+                                <span class="text-sm text-gray-700">Provider booking & management</span>
+                            </div>
+                            <div class="flex items-start">
+                                <i data-feather="check" class="w-4 h-4 text-green-500 mr-3 mt-0.5 flex-shrink-0"></i>
+                                <span class="text-sm text-gray-700">Phone & chat support</span>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                            <p class="text-xs text-gray-600 font-medium">Best for:</p>
+                            <p class="text-xs text-gray-600">Managing routine care while maintaining family budget</p>
+                        </div>
+                        
+                        <button onclick="toggleDetails('essential-care')" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition duration-300 text-center block mb-4 text-sm">
+                            <span id="essential-care-toggle">View Full Details</span>
+                            <i data-feather="chevron-down" class="w-4 h-4 inline ml-1" id="essential-care-icon"></i>
+                        </button>
+                        
+                        <div id="essential-care-details" class="hidden mb-6">
+                            <div class="bg-white border border-gray-200 rounded-lg p-4 text-sm">
+                                <h4 class="font-semibold text-gray-800 mb-3">Your Dedicated Care Helper</h4>
+                                <p class="text-gray-600 mb-4">You have the system, now you have the support. A real person to handle the logistics of routine care, giving you back hours each week.</p>
+                                
+                                <div class="space-y-3">
+                                    <div>
+                                        <h5 class="font-medium text-gray-700">Your Dedicated Care Guide</h5>
+                                        <p class="text-gray-600 text-xs">A real, named person who learns your parent's routines and preferences. They become your trusted, single point of contact for everything.</p>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-medium text-gray-700">10 Coordination Tasks/Month</h5>
+                                        <p class="text-gray-600 text-xs">Your Guide handles the calls and bookings. You simply ask them to "book Mum's physio transport" or "find a reliable gardener."</p>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-medium text-gray-700">Weekly Wellbeing Check-in Calls</h5>
+                                        <p class="text-gray-600 text-xs">Your Guide will call your parent for a friendly chat each week, providing you with a reliable update and giving you peace of mind.</p>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-medium text-gray-700">Provider Booking & Management</h5>
+                                        <p class="text-gray-600 text-xs">We don't just give you a list; we book and manage the vetted providers for you, ensuring quality and saving you the awkward conversations.</p>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-medium text-gray-700">Basic System Navigation</h5>
+                                        <p class="text-gray-600 text-xs">Your Guide helps you understand the first steps with social services and what your family might be entitled to.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <a href="/contact.html" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-lg font-medium transition duration-300 text-center block">
+                            Get Started
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Tier 3 -->
+                <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col">
+                    <div class="p-6 flex flex-col flex-grow">
+                        <div class="text-center mb-6">
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">Preferred care</h3>
+                            <div class="text-3xl font-bold text-indigo-600 mb-1">£179</div>
+                            <div class="text-sm text-gray-500 mb-3">per month</div>
+                            <div class="text-xs text-orange-600 font-medium bg-orange-50 px-3 py-1 rounded-full inline-block">6-month commitment</div>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-6 text-center">Comprehensive support for complex care needs</p>
+                        
+                        <div class="space-y-3 mb-8 flex-grow">
+                            <div class="flex items-start">
+                                <i data-feather="check" class="w-4 h-4 text-green-500 mr-3 mt-0.5 flex-shrink-0"></i>
+                                <span class="text-sm text-gray-700"><strong>Everything in Essential, PLUS:</strong></span>
+                            </div>
+                            <div class="flex items-start">
+                                <i data-feather="check" class="w-4 h-4 text-green-500 mr-3 mt-0.5 flex-shrink-0"></i>
+                                <span class="text-sm text-gray-700">15 coordination tasks per month</span>
+                            </div>
+                            <div class="flex items-start">
+                                <i data-feather="check" class="w-4 h-4 text-green-500 mr-3 mt-0.5 flex-shrink-0"></i>
+                                <span class="text-sm text-gray-700">Priority response (2-hour guarantee)</span>
+                            </div>
+                            <div class="flex items-start">
+                                <i data-feather="check" class="w-4 h-4 text-green-500 mr-3 mt-0.5 flex-shrink-0"></i>
+                                <span class="text-sm text-gray-700">GP & social services liaison</span>
+                            </div>
+                            <div class="flex items-start">
+                                <i data-feather="check" class="w-4 h-4 text-green-500 mr-3 mt-0.5 flex-shrink-0"></i>
+                                <span class="text-sm text-gray-700">Medication management support</span>
+                            </div>
+                            <div class="flex items-start">
+                                <i data-feather="check" class="w-4 h-4 text-green-500 mr-3 mt-0.5 flex-shrink-0"></i>
+                                <span class="text-sm text-gray-700">Emergency support line</span>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                            <p class="text-xs text-gray-600 font-medium">Best for:</p>
+                            <p class="text-xs text-gray-600">Families with complex schedules needing reliable, responsive support</p>
+                        </div>
+                        
+                        <button onclick="toggleDetails('preferred-care')" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition duration-300 text-center block mb-4 text-sm">
+                            <span id="preferred-care-toggle">View Full Details</span>
+                            <i data-feather="chevron-down" class="w-4 h-4 inline ml-1" id="preferred-care-icon"></i>
+                        </button>
+                        
+                        <div id="preferred-care-details" class="hidden mb-6">
+                            <div class="bg-white border border-gray-200 rounded-lg p-4 text-sm">
+                                <h4 class="font-semibold text-gray-800 mb-3">Your Proactive Care Partner</h4>
+                                <p class="text-gray-600 mb-4">When care needs become more complex and your time is stretched thin. We act as an extension of your family, ensuring nothing slips through the cracks.</p>
+                                
+                                <div class="space-y-3">
+                                    <div>
+                                        <h5 class="font-medium text-gray-700">15 Coordination Tasks/Month</h5>
+                                        <p class="text-gray-600 text-xs">More capacity for busier periods. Handle medication queries, GP liaison, and complex scheduling with ease.</p>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-medium text-gray-700">Priority Response (2-Hour Guarantee)</h5>
+                                        <p class="text-gray-600 text-xs">Get a response to urgent queries within two hours. We know that care crises don't wait, and neither should you.</p>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-medium text-gray-700">GP & Social Services Liaison</h5>
+                                        <p class="text-gray-600 text-xs">Your Guide becomes your advocate, making calls to the surgery to chase referrals or clarifying assessment details with social services.</p>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-medium text-gray-700">Medication Management Support</h5>
+                                        <p class="text-gray-600 text-xs">Your Guide can help set up pill organisers, coordinate with the pharmacy for deliveries, and send you reminders for prescription renewals.</p>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-medium text-gray-700">Monthly Family Update Reports</h5>
+                                        <p class="text-gray-600 text-xs">Receive a concise email summary of your parent's wellbeing, completed tasks, and any observations, keeping the whole family in the loop.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <a href="/contact.html" class="w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-600 px-4 py-3 rounded-lg font-medium transition duration-300 text-center block">
+                            Get Started
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Tier 4 -->
+                <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col">
+                    <div class="p-6 flex flex-col flex-grow">
+                        <div class="text-center mb-6">
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">Comprehensive care</h3>
+                            <div class="text-3xl font-bold text-indigo-600 mb-1">£229</div>
+                            <div class="text-sm text-gray-500 mb-3">per month</div>
+                            <div class="text-xs text-blue-600 font-medium bg-blue-50 px-3 py-1 rounded-full inline-block">12-month partnership</div>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-6 text-center">Complete peace of mind for complex situations</p>
+                        
+                        <div class="space-y-3 mb-8 flex-grow">
+                            <div class="flex items-start">
+                                <i data-feather="check" class="w-4 h-4 text-green-500 mr-3 mt-0.5 flex-shrink-0"></i>
+                                <span class="text-sm text-gray-700"><strong>Everything in Preferred, PLUS:</strong></span>
+                            </div>
+                            <div class="flex items-start">
+                                <i data-feather="check" class="w-4 h-4 text-green-500 mr-3 mt-0.5 flex-shrink-0"></i>
+                                <span class="text-sm text-gray-700">Unlimited coordination tasks</span>
+                            </div>
+                            <div class="flex items-start">
+                                <i data-feather="check" class="w-4 h-4 text-green-500 mr-3 mt-0.5 flex-shrink-0"></i>
+                                <span class="text-sm text-gray-700">24/7 safety monitoring (sensors included)</span>
+                            </div>
+                            <div class="flex items-start">
+                                <i data-feather="check" class="w-4 h-4 text-green-500 mr-3 mt-0.5 flex-shrink-0"></i>
+                                <span class="text-sm text-gray-700">Crisis management & intervention</span>
+                            </div>
+                            <div class="flex items-start">
+                                <i data-feather="check" class="w-4 h-4 text-green-500 mr-3 mt-0.5 flex-shrink-0"></i>
+                                <span class="text-sm text-gray-700">Full benefits optimization</span>
+                            </div>
+                            <div class="flex items-start">
+                                <i data-feather="check" class="w-4 h-4 text-green-500 mr-3 mt-0.5 flex-shrink-0"></i>
+                                <span class="text-sm text-gray-700">Dedicated family liaison</span>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                            <p class="text-xs text-gray-600 font-medium">Best for:</p>
+                            <p class="text-xs text-gray-600">Long-distance caregivers or complex care situations</p>
+                        </div>
+                        
+                        <button onclick="toggleDetails('comprehensive-care')" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition duration-300 text-center block mb-4 text-sm">
+                            <span id="comprehensive-care-toggle">View Full Details</span>
+                            <i data-feather="chevron-down" class="w-4 h-4 inline ml-1" id="comprehensive-care-icon"></i>
+                        </button>
+                        
+                        <div id="comprehensive-care-details" class="hidden mb-6">
+                            <div class="bg-white border border-gray-200 rounded-lg p-4 text-sm">
+                                <h4 class="font-semibold text-gray-800 mb-3">Your Complete Peace of Mind</h4>
+                                <p class="text-gray-600 mb-4">For long-distance families or when a parent's needs are significant. We provide a full safety net, managing daily logistics and being there in a crisis.</p>
+                                
+                                <div class="space-y-3">
+                                    <div>
+                                        <h5 class="font-medium text-gray-700">Unlimited Coordination Tasks</h5>
+                                        <p class="text-gray-600 text-xs">Never count a task again. From the smallest errand to complex multi-provider coordination, your Guide handles it all.</p>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-medium text-gray-700">24/7 Safety Monitoring (Sensors Included)</h5>
+                                        <p class="text-gray-600 text-xs">We supply and monitor discreet, non-invasive sensors for motion, doors, and beds. Our team is alerted to unusual activity.</p>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-medium text-gray-700">Crisis Management & Intervention</h5>
+                                        <p class="text-gray-600 text-xs">We are your first call, 24/7. If a sensor alert is triggered or your parent has a fall, we manage the situation—calling emergency services and liaising with paramedics.</p>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-medium text-gray-700">Full Benefits Optimization</h5>
+                                        <p class="text-gray-600 text-xs">We don't just guide you; we actively help complete and submit forms for Attendance Allowance and other benefits.</p>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-medium text-gray-700">Quarterly Care Plan Reviews</h5>
+                                        <p class="text-gray-600 text-xs">Your Guide formally assesses the care plan with you and your parent, ensuring it evolves with their needs.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <a href="/contact.html" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-lg font-medium transition duration-300 text-center block">
+                            Get Started
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-16 text-center">
+                <p class="text-gray-600 mb-4">Need help choosing the right plan?</p>
+                <a href="/contact.html" class="text-indigo-600 hover:text-indigo-700 font-medium inline-flex items-center">
+                    Contact our team <i data-feather="arrow-right" class="ml-2 w-4 h-4"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="py-20 bg-indigo-600 text-white px-4">
+<div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-6">Ready to simplify care?</h2>
+            <p class="text-xl mb-8">Book a free 30-minute consultation to discuss your family's needs</p>
+            <a href="/contact.html" class="bg-white hover:bg-gray-100 text-indigo-600 px-8 py-4 rounded-lg font-medium transition duration-300 inline-block">
+                Get Started Today
+            </a>
+        </div>
+    </section>
+
+    <custom-footer></custom-footer>
+
+    <script src="components/navbar.js"></script>
+    <script src="components/footer.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // Initialize feather icons
+        feather.replace();
+        // Initialize Vanta.js background
+        VANTA.GLOBE({
+            el: "#vanta-bg",
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 200.00,
+            minWidth: 200.00,
+            scale: 1.00,
+            scaleMobile: 1.00,
+            color: 0x5b6ee1,
+            backgroundColor: 0x111827
+        });
+</script>
+<script src="https://deepsite.hf.co/deepsite-badge.js"></script>
+</body>
+</html>
