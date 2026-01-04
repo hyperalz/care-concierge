@@ -77,12 +77,12 @@ html {
 
 /* Custom button styles */
 .btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
     transition: all 0.3s ease;
 }
 
 .btn-primary:hover {
-    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
     transform: translateY(-2px);
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
@@ -101,7 +101,7 @@ html {
     left: -2px;
     right: -2px;
     bottom: -2px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #1e3a8a, #1e40af);
     border-radius: 1rem;
     z-index: -1;
 }
@@ -137,10 +137,10 @@ html {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #667eea;
+    background: #1e3a8a;
     border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #5a67d8;
+    background: #1e40af;
 }
