@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Impulse Migration – RAG Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/feather-icons"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#006B5B',
+            primaryLight: '#E0F2F1',
+            caerphilly: {
+              green: '#006B5B',
+              dark: '#004D40',
+              light: '#E0F2F1',
+              accent: '#00897B'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'DM Sans', system-ui, sans-serif; }
+    [contenteditable="true"] {
+      outline: none;
+      border-radius: 0.25rem;
+      min-height: 1.5rem;
+    }
+    [contenteditable="true"]:focus {
+      box-shadow: 0 0 0 2px rgba(0, 107, 91, 0.25);
+      background-color: #E0F2F1;
+    }
+    [contenteditable="true"]:hover { background-color: #f8fafc; cursor: text; }
+    .rag-table thead th {
+      background: #004D40;
+      color: #fff;
+      font-weight: 600;
+      letter-spacing: 0.025em;
+      white-space: nowrap;
+    }
+    .rag-table thead { position: sticky; top: 0; z-index: 10; }
+    .rag-table thead th:nth-last-child(2) { position: sticky; right: 4rem; background: #004D40; z-index: 11; box-shadow: -8px 0 8px -4px rgba(0,0,0,0.15); }
+    .rag-table thead th:last-child { position: sticky; right: 0; background: #004D40; z-index: 11; }
+    .rag-table tbody tr { transition: background-color 0.15s ease; }
+    .rag-table tbody tr:hover { background-color: #f8fafc; }
+    .rag-table tbody td:nth-last-child(2) { position: sticky; right: 4rem; background: white; box-shadow: -8px 0 8px -4px rgba(0,0,0,0.08); }
+    .rag-table tbody td:last-child { position: sticky; right: 0; background: white; box-shadow: -4px 0 6px -2px rgba(0,0,0,0.06); }
+    .rag-table tbody tr:hover td:nth-last-child(2),
+    .rag-table tbody tr:hover td:last-child { background: #f8fafc; }
+    select.rag-select, select.trend-select, select.prob-select, select.impact-select, select.plan-status-select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='currentColor' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.5rem center;
+      background-size: 10px;
+      padding-right: 1.75rem;
+    }
+    .btn-primary { background: #006B5B; color: white; }
+    .btn-primary:hover { background: #00897B; }
+    .btn-secondary { background: white; color: #475569; border: 1px solid #e2e8f0; }
+    .btn-secondary:hover { background: #f8fafc; border-color: #cbd5e1; }
+    .btn-ghost { background: transparent; color: #64748b; }
+    .btn-ghost:hover { background: #f1f5f9; color: #0f172a; }
+    .row-drag-handle {
+      cursor: grab;
+      touch-action: none;
+      display: inline-flex;
+      align-items: center;
+      color: #94a3b8;
+    }
+    .row-drag-handle:active { cursor: grabbing; }
+    .row-drag-handle:hover { color: #64748b; }
+    .rag-table tr.dragging { opacity: 0.5; }
+    .rag-table tr.drag-over td { border-top: 2px solid #006B5B; }
+    .plan-row-done {
+      background: #f1f5f9;
+      opacity: 0.9;
+    }
+    .plan-row-done td {
+      color: #64748b;
+    }
+    .plan-row-done .plan-status-select {
+      color: #006B5B;
+      font-weight: 600;
+    }
+    .plan-status-select {
+      min-width: 7.5rem;
+      white-space: nowrap;
+    }
+    .project-tile {
+      background: linear-gradient(135deg, #E0F2F1 0%, #f0fdfa 100%);
+      border: 1px solid #a7f3ec;
+    }
+    .tab-btn {
+      transition: color 0.15s, background 0.15s, border-color 0.15s;
+      background: white;
+      border: 1px solid #e2e8f0;
+      color: #475569;
+    }
+    .tab-btn.active { background: #006B5B; color: white; border-color: #006B5B; }
+    .tab-btn:not(.active):hover { background: #f1f5f9; color: #0f172a; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .plan-phase-title {
+      background: #004D40;
+      color: #fff;
+      font-weight: 600;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+      font-size: 0.9375rem;
+    }
+    .timeline {
+      position: relative;
+      padding-left: 0;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 7.25rem;
+      top: 0.75rem;
+      bottom: 0.75rem;
+      width: 2px;
+      background: #cbd5e1;
+      border-radius: 1px;
+    }
+    .timeline-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+    .timeline-date {
+      flex-shrink: 0;
+      width: 6rem;
+      font-weight: 700;
+      font-size: 0.75rem;
+      color: #006B5B;
+      background: #E0F2F1;
+      border: 1px solid #80cbc4;
+      padding: 0.35rem 0.5rem;
+      border-radius: 0.375rem;
+      text-align: center;
+      line-height: 1.3;
+    }
+    .timeline-marker {
+      flex-shrink: 0;
+      width: 0.5rem;
+      height: 0.5rem;
+      margin-top: 0.4rem;
+      background: #006B5B;
+      border-radius: 50%;
+      border: 2px solid white;
+      box-shadow: 0 0 0 1px #006B5B;
+    }
+    .timeline-content {
+      flex: 1;
+      min-width: 0;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-left: 3px solid #006B5B;
+      border-radius: 0.375rem;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8125rem;
+      color: #334155;
+    }
+    .timeline-content ul {
+      margin: 0.25rem 0 0 1rem;
+      padding: 0;
+      list-style: disc;
+    }
+    .timeline-content li { margin-bottom: 0.15rem; }
+    .timeline-owner {
+      display: inline-block;
+      margin-top: 0.35rem;
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+    .plan-summary-box {
+      background: linear-gradient(135deg, #E0F2F1 0%, #e8f5e9 100%);
+      border: 1px solid #80cbc4;
+      border-radius: 0.5rem;
+      padding: 1rem 1.25rem;
+      margin-top: 1.5rem;
+    }
+    .timeline-delete {
+      flex-shrink: 0;
+      width: 1.5rem;
+      height: 1.5rem;
+      padding: 0;
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      font-size: 1.1rem;
+      line-height: 1;
+      cursor: pointer;
+      border-radius: 0.25rem;
+      margin-top: 0.25rem;
+    }
+    .timeline-delete:hover { color: #dc2626; background: #fef2f2; }
+    .timeline-drag-handle {
+      cursor: grab;
+      touch-action: none;
+      display: inline-flex;
+      align-items: center;
+      color: #5eead4;
+      font-size: 0.7rem;
+      padding: 0 0.15rem;
+      margin-right: 0.2rem;
+      user-select: none;
+    }
+    .timeline-drag-handle:active { cursor: grabbing; }
+    .timeline-drag-handle:hover { color: #006B5B; }
+    .timeline-item .timeline-date {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: left;
+    }
+    .timeline-date-text { flex: 1; min-width: 0; outline: none; }
+    .timeline-item.dragging { opacity: 0.5; }
+    .timeline-item.drag-over { border-top: 2px solid #006B5B; }
+    @media print {
+      header button { display: none !important; }
+      body { background: white; }
+      .bg-slate-50 { background: white; }
+      .border { border-color: #e2e8f0; }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-700 antialiased">
+  <div class="min-h-screen flex flex-col">
+    <header class="border-b border-slate-200 bg-white shadow-sm">
+      <div class="max-w-[1600px] mx-auto px-6 py-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div class="flex items-center gap-4">
+            <img src="assets/caerphilly-logo.png" alt="Caerphilly County Borough Council" class="h-10 sm:h-12 w-auto object-contain" />
+            <div>
+              <h1 class="text-lg font-semibold text-slate-900 tracking-tight">RAG Dashboard</h1>
+              <p class="text-slate-500 text-sm mt-0.5">Caerphilly risk register · Click any cell to edit</p>
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button id="addRowBtn" class="bg-[#006B5B] hover:bg-[#00897B] text-white inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm">
+              <i data-feather="plus" class="w-4 h-4"></i> Add row
+            </button>
+            <button id="exportCsvBtn" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+              <i data-feather="download" class="w-4 h-4"></i> Export CSV
+            </button>
+            <button id="exportAllCsvBtn" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors" title="Export risk register and plan as two CSV files">
+              <i data-feather="download" class="w-4 h-4"></i> Export all
+            </button>
+            <button id="printBtn" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+              <i data-feather="printer" class="w-4 h-4"></i> Print
+            </button>
+            <button id="resetBtn" class="bg-white border border-slate-200 text-slate-600 hover:text-red-600 hover:border-red-200 hover:bg-red-50 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+              <i data-feather="rotate-ccw" class="w-4 h-4"></i> Reset
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1 max-w-[1600px] w-full mx-auto px-6 py-6">
+      <div class="project-tile rounded-xl shadow-sm px-5 py-4 mb-6">
+        <h2 id="projectTitle" class="text-2xl font-bold text-slate-900 tracking-tight" contenteditable="true" data-placeholder="Project title">Impulse Migration</h2>
+        <div class="flex flex-wrap gap-6 mt-3 text-sm">
+          <div class="flex items-baseline gap-2">
+            <span class="text-slate-500 font-medium shrink-0">SRO</span>
+            <span id="projectSro" class="text-slate-800 min-w-[8rem]" contenteditable="true" data-placeholder="Name">—</span>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span class="text-slate-500 font-medium shrink-0">Delivery Lead</span>
+            <span id="projectDeliveryLead" class="text-slate-800 min-w-[8rem]" contenteditable="true" data-placeholder="Name">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex gap-1 mb-4">
+        <button type="button" class="tab-btn active rounded-lg px-4 py-2 text-sm font-medium" data-tab="rag">RAG / Risk Register</button>
+        <button type="button" class="tab-btn rounded-lg px-4 py-2 text-sm font-medium" data-tab="plan">Plan / Timeline</button>
+      </div>
+
+      <div id="tab-rag" class="tab-panel active">
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table id="ragTable" class="rag-table w-full text-sm text-left">
+            <thead>
+              <tr>
+                <th class="px-5 py-3.5 text-left w-14"></th>
+                <th class="px-5 py-3.5 text-left min-w-[140px]">Category</th>
+                <th class="px-5 py-3.5 text-center w-28">RAG</th>
+                <th class="px-5 py-3.5 text-left min-w-[200px]">Risk/Issue</th>
+                <th class="px-5 py-3.5 text-center w-24" title="1=Very low likelihood, 5=Very high">Probability</th>
+                <th class="px-5 py-3.5 text-center w-24" title="1=Minor, 5=Catastrophic">Impact</th>
+                <th class="px-5 py-3.5 text-center w-24">Priority</th>
+                <th class="px-5 py-3.5 text-left min-w-[180px]">Mitigation / Next Action</th>
+                <th class="px-5 py-3.5 text-left w-28">Owner</th>
+                <th class="px-5 py-3.5 text-left w-28">Due Date</th>
+                <th class="px-5 py-3.5 text-left min-w-[130px] w-36">Trend</th>
+                <th class="px-5 py-3.5 text-center w-16"></th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100" id="tableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <p class="text-slate-400 text-xs mt-4">Changes auto-save to this device. Works offline.</p>
+      </div>
+
+      <div id="tab-plan" class="tab-panel">
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table id="planTable" class="rag-table w-full text-sm text-left">
+              <thead>
+                <tr>
+                  <th class="px-5 py-3.5 text-left w-14"></th>
+                  <th class="px-5 py-3.5 text-left min-w-[100px]">Date needed</th>
+                  <th class="px-5 py-3.5 text-left min-w-[140px]">Phase</th>
+                  <th class="px-5 py-3.5 text-left min-w-[220px]">Task / Activity</th>
+                  <th class="px-5 py-3.5 text-left w-28">Team</th>
+                  <th class="px-5 py-3.5 text-left w-28">Owner</th>
+                  <th class="px-5 py-3.5 text-center min-w-[140px]">Status</th>
+                  <th class="px-5 py-3.5 text-center w-16"></th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100" id="planTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <p class="text-slate-400 text-xs mt-4">Changes auto-save to this device. Works offline.</p>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    feather.replace();
+
+    const STORAGE_KEY = 'impulse-rag-test';
+
+    const initialData = [
+      { dimension:"Schedule / Timeline", rag:"Green", evidence:"All March training & data cuts on track; GOSS 14 Feb prepped. No slippage.", probability:1, impact:2, action:"Monitor summer peak (Jul–Sep).", owner:"Liz", due:"Ongoing", trend:"↑ Stable" },
+      { dimension:"Data Migration & Cleanse", rag:"Amber", evidence:"Address cleanse meeting pending; spreadsheet inventory incomplete; exceptions not fully highlighted.", probability:4, impact:3, action:"Kick-off cleanse meeting this week; complete inventory by 10 Feb.", owner:"Lewis / Tom", due:"10 Feb 2026", trend:"↓ Worsening" },
+      { dimension:"Resources / Training", rag:"Amber", evidence:"Training wave starts March; Bev/sysadmin slots booked; but 240 users = high volume risk.", probability:3, impact:3, action:"Finalize user roles/licenses list; train-the-trainer plan.", owner:"Liz / Bev", due:"End Feb", trend:"Stable" },
+      { dimension:"Budget / Costs", rag:"Green", evidence:"Within forecast; no variances noted yet.", probability:1, impact:1, action:"Track CACI on-site & extra days costs.", owner:"Finance lead", due:"Monthly", trend:"Stable" },
+      { dimension:"Scope / Deliverables", rag:"Amber", evidence:"Parent portal priority not locked; some outputs (e.g., ALN panels) post-April; manual workarounds high.", probability:4, impact:4, action:"Confirm parent portal timeline with CACI; prioritize over HuB short-term.", owner:"Lewis / CACI", due:"Mid Feb", trend:"↑ Improving" },
+      { dimension:"Risks & Issues", rag:"Red", evidence:"Manual workload April–June could cause burnout; data gaps if cleanse delayed; summer peak clash.", probability:5, impact:5, action:"Resource capacity plan; contingency for manual hump; escalate to SMT if cleanse slips.", owner:"PM / SMT", due:"7 Feb", trend:"↓ Escalating" },
+      { dimension:"Stakeholder / Comms", rag:"Green", evidence:"Lisa owns; front-page notice planned; schools engagement starting.", probability:1, impact:1, action:"Finalize schools comms for 5 ALN sites (Louisa).", owner:"Lisa / Louisa", due:"End Feb", trend:"Stable" }
+    ];
+
+    const ragOptions = [
+      { value:"Green", label:"Green", class:"bg-green-600 text-white" },
+      { value:"Amber", label:"Amber", class:"bg-yellow-400 text-gray-900" },
+      { value:"Red",   label:"Red",   class:"bg-red-600 text-white" }
+    ];
+
+    const trendOptions = [
+      { value:"↑ Stable",     icon:"trending-up",   color:"text-green-600" },
+      { value:"↓ Worsening",  icon:"trending-down", color:"text-red-600"   },
+      { value:"Stable",       icon:"minus",         color:"text-gray-600"  },
+      { value:"↑ Improving",  icon:"trending-up",   color:"text-green-600" },
+      { value:"↓ Escalating", icon:"alert-triangle",color:"text-red-600"   }
+    ];
+
+    const probabilityOptions = [
+      { value:1, label:"1 (10–30%)" },
+      { value:2, label:"2" },
+      { value:3, label:"3" },
+      { value:4, label:"4" },
+      { value:5, label:"5 (70–90%)" }
+    ];
+
+    const impactOptions = [
+      { value:1, label:"1 Minor" },
+      { value:2, label:"2" },
+      { value:3, label:"3" },
+      { value:4, label:"4" },
+      { value:5, label:"5 Catastrophic" }
+    ];
+
+    function getPriority(prob, impact) {
+      const p = parseInt(prob, 10);
+      const i = parseInt(impact, 10);
+      if (!p || !i) return { label: "—", class: "bg-slate-100 text-slate-500" };
+      const score = p * i;
+      if (score <= 4) return { label: "Low", class: "bg-emerald-100 text-emerald-800" };
+      if (score <= 9) return { label: "Medium", class: "bg-amber-100 text-amber-800" };
+      if (score <= 16) return { label: "High", class: "bg-orange-100 text-orange-800" };
+      return { label: "Critical", class: "bg-red-100 text-red-800" };
+    }
+
+    function prioritySortScore(row) {
+      const p = parseInt(row.probability, 10) || 0;
+      const i = parseInt(row.impact, 10) || 0;
+      return p * i;
+    }
+
+    function createRow(data = { dimension:"", rag:"Green", evidence:"", probability:"", impact:"", action:"", owner:"", due:"", trend:"Stable" }) {
+      const rowIndex = document.querySelectorAll('#tableBody tr').length + 1;
+      const ragClass = ragOptions.find(o => o.value === data.rag)?.class || 'bg-slate-100 text-slate-700';
+      const prob = (data.probability != null && data.probability !== '') ? Number(data.probability) : '';
+      const imp = (typeof data.impact === 'number' || (typeof data.impact === 'string' && /^[1-5]$/.test(data.impact))) ? Number(data.impact) : '';
+      const priority = getPriority(prob, imp);
+      const tr = document.createElement('tr');
+      tr.className = 'group';
+      tr.dataset.rowId = 'row-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+      tr.innerHTML = `
+        <td class="px-2 py-3.5 align-middle">
+          <span class="row-drag-handle" draggable="true" aria-label="Drag to reorder">
+            <i data-feather="menu" class="w-4 h-4"></i>
+          </span>
+          <span class="row-num font-medium text-slate-500 tabular-nums ml-1">${rowIndex}</span>
+        </td>
+        <td class="px-5 py-3.5" contenteditable="true">${escapeHtml(data.dimension)}</td>
+        <td class="px-5 py-3.5 text-center">
+          <select class="rag-select px-3 py-1.5 rounded-lg text-sm font-medium border-0 focus:outline-none focus:ring-2 focus:ring-[#006B5B]/50 ${ragClass}">
+            ${ragOptions.map(opt => `<option value="${opt.value}" ${data.rag === opt.value ? 'selected' : ''}>${opt.label}</option>`).join('')}
+          </select>
+        </td>
+        <td class="px-5 py-3.5" contenteditable="true">${escapeHtml(data.evidence)}</td>
+        <td class="px-5 py-3.5 text-center">
+          <select class="prob-select w-full px-2 py-1.5 rounded-lg text-sm border border-slate-200 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#006B5B]/50">
+            <option value="">—</option>
+            ${probabilityOptions.map(opt => `<option value="${opt.value}" ${prob === opt.value ? 'selected' : ''}>${opt.label}</option>`).join('')}
+          </select>
+        </td>
+        <td class="px-5 py-3.5 text-center">
+          <select class="impact-select w-full px-2 py-1.5 rounded-lg text-sm border border-slate-200 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#006B5B]/50">
+            <option value="">—</option>
+            ${impactOptions.map(opt => `<option value="${opt.value}" ${imp === opt.value ? 'selected' : ''}>${opt.label}</option>`).join('')}
+          </select>
+        </td>
+        <td class="px-5 py-3.5 text-center">
+          <span class="priority-badge inline-block px-2 py-0.5 rounded text-xs font-medium ${priority.class}">${priority.label}</span>
+        </td>
+        <td class="px-5 py-3.5" contenteditable="true">${escapeHtml(data.action)}</td>
+        <td class="px-5 py-3.5" contenteditable="true">${escapeHtml(data.owner)}</td>
+        <td class="px-5 py-3.5" contenteditable="true">${escapeHtml(data.due)}</td>
+        <td class="px-5 py-3.5">
+          <select class="trend-select w-full px-2.5 py-1.5 rounded-lg text-sm border border-slate-200 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#006B5B]/50 focus:border-[#006B5B]">
+            ${trendOptions.map(opt => `<option value="${opt.value}" ${data.trend === opt.value ? 'selected' : ''}>${opt.value}</option>`).join('')}
+          </select>
+        </td>
+        <td class="px-5 py-3.5 text-center">
+          <button type="button" class="delete-row p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors" aria-label="Delete row">
+            <i data-feather="trash-2" class="w-4 h-4"></i>
+          </button>
+        </td>
+      `;
+
+      const ragSelect = tr.querySelector('.rag-select');
+      ragSelect.addEventListener('change', () => {
+        const opt = ragOptions.find(o => o.value === ragSelect.value);
+        ragSelect.className = `rag-select px-3 py-1.5 rounded-lg text-sm font-medium border-0 focus:outline-none focus:ring-2 focus:ring-[#006B5B]/50 ${opt.class}`;
+        autoSave();
+      });
+
+      const trendSelect = tr.querySelector('.trend-select');
+      trendSelect.addEventListener('change', () => autoSave());
+
+      const probSelect = tr.querySelector('.prob-select');
+      const impactSelect = tr.querySelector('.impact-select');
+      const priorityBadge = tr.querySelector('.priority-badge');
+      const refreshPriority = () => {
+        const p = getPriority(probSelect.value, impactSelect.value);
+        priorityBadge.textContent = p.label;
+        priorityBadge.className = 'priority-badge inline-block px-2 py-0.5 rounded text-xs font-medium ' + p.class;
+        autoSave();
+        renderTable(getCurrentData());
+      };
+      probSelect.addEventListener('change', refreshPriority);
+      impactSelect.addEventListener('change', refreshPriority);
+
+      tr.querySelectorAll('[contenteditable="true"]').forEach(el => el.addEventListener('input', autoSave));
+
+      return tr;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function updateRowNumbers() {
+      document.querySelectorAll('#tableBody tr').forEach((tr, i) => {
+        const numEl = tr.querySelector('.row-num');
+        if (numEl) numEl.textContent = i + 1;
+      });
+    }
+
+    function getCurrentData() {
+      return Array.from(document.querySelectorAll('#tableBody tr')).map(tr => {
+        const cells = tr.cells;
+        const trendSelect = cells[10].querySelector('.trend-select');
+        return {
+          dimension: cells[1].textContent.trim(),
+          rag: cells[2].querySelector('.rag-select').value,
+          evidence: cells[3].textContent.trim(),
+          probability: cells[4].querySelector('.prob-select')?.value ?? '',
+          impact: cells[5].querySelector('.impact-select')?.value ?? '',
+          action: cells[7].textContent.trim(),
+          owner: cells[8].textContent.trim(),
+          due: cells[9].textContent.trim(),
+          trend: trendSelect ? trendSelect.value : (cells[10].textContent.trim().replace(/^[↑↓]\s*/, '').trim() || 'Stable')
+        };
+      });
+    }
+
+    function autoSave() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(getCurrentData()));
+    }
+
+    function renderTable(data) {
+      const sorted = [...data].sort((a, b) => prioritySortScore(b) - prioritySortScore(a));
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = '';
+      sorted.forEach(item => tbody.appendChild(createRow(item)));
+      feather.replace();
+      updateRowNumbers();
+    }
+
+    // Load data
+    const saved = localStorage.getItem(STORAGE_KEY);
+    renderTable(saved ? JSON.parse(saved) : initialData);
+
+    // Project tile: load and save
+    const TILE_KEY = 'impulse-rag-tile';
+    const projectTitleEl = document.getElementById('projectTitle');
+    const projectSroEl = document.getElementById('projectSro');
+    const projectDeliveryLeadEl = document.getElementById('projectDeliveryLead');
+    const tileData = JSON.parse(localStorage.getItem(TILE_KEY) || '{}');
+    if (tileData.title != null) projectTitleEl.textContent = tileData.title;
+    if (tileData.sro != null) projectSroEl.textContent = tileData.sro;
+    if (tileData.deliveryLead != null) projectDeliveryLeadEl.textContent = tileData.deliveryLead;
+    function saveTile() {
+      localStorage.setItem(TILE_KEY, JSON.stringify({
+        title: projectTitleEl.textContent.trim(),
+        sro: projectSroEl.textContent.trim(),
+        deliveryLead: projectDeliveryLeadEl.textContent.trim()
+      }));
+    }
+    [projectTitleEl, projectSroEl, projectDeliveryLeadEl].forEach(el => {
+      el.addEventListener('input', saveTile);
+      el.addEventListener('blur', saveTile);
+    });
+
+    // Tabs: RAG vs Plan
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tab = btn.dataset.tab;
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById('tab-' + tab).classList.add('active');
+      });
+    });
+
+    // Plan table (same construct as RAG: add/delete/drag/export/reset)
+    const PLAN_TABLE_KEY = 'impulse-rag-plan-table';
+    const statusOptions = [
+      { value: 'To do', label: 'To do' },
+      { value: 'In progress', label: 'In progress' },
+      { value: 'Done', label: 'Done' }
+    ];
+    const initialPlanData = [
+      { dateNeeded: '14 Feb 2026', phase: 'Pre-Go-Live', task: 'GOSS forms go live for late applications (ideally with Welsh support)', team: '', owner: 'Liz', status: 'To do' },
+      { dateNeeded: 'Feb 2026', phase: 'Pre-Go-Live', task: 'Address/postcode cleanse meeting; spreadsheet inventory & exceptions; data definition CME/EWS; ALN template share & 5 schools comms', team: '', owner: 'Lewis / Tom / Louisa', status: 'To do' },
+      { dateNeeded: 'Mar 2026', phase: 'Pre-Go-Live', task: 'Core training wave; specific training (EY, FSM, exclusions); SysAdmin (Bev); workshops; data cuts/mapping/testing; EY payments / Metabase (~2 Mar)', team: '', owner: 'Liz / Bev', status: 'To do' },
+      { dateNeeded: '27 Mar 2026', phase: 'Pre-Go-Live', task: 'Flying Start attendance registers by 09:00–09:30; final inputs & comms to childcare by 5pm', team: '', owner: '', status: 'To do' },
+      { dateNeeded: '27–28 Mar 2026', phase: 'Pre-Go-Live', task: 'Final activities / 1st data cut', team: '', owner: '', status: 'To do' },
+      { dateNeeded: '30–31 Mar 2026', phase: 'Pre-Go-Live', task: 'Data overlap / catch-up period', team: '', owner: '', status: 'To do' },
+      { dateNeeded: '31 Mar 2026', phase: 'Pre-Go-Live', task: 'Synergy feeds stop; manual workarounds peak', team: '', owner: '', status: 'To do' },
+      { dateNeeded: '1 Apr 2026', phase: 'Go-Live', task: 'Core go-live: CACI on-site; manual processes start; core pupil data live; Day 1 access (Admissions, EY, FSM, Referrals, Exclusions, CME/EWS, Safeguarding, LAC, ALN, Transport)', team: '', owner: '', status: 'To do' },
+      { dateNeeded: '10 Apr 2026', phase: 'Go-Live', task: 'SAILS/SALE report: Full year Flying Start data to Welsh Government (from Strive)', team: 'EY team', owner: 'Lauren', status: 'To do' },
+      { dateNeeded: '14 Apr 2026', phase: 'Go-Live', task: 'Flying Start placements processing', team: '', owner: '', status: 'To do' },
+      { dateNeeded: 'End Apr 2026', phase: 'Go-Live', task: '5 schools fully on ALN case management (with training/embedding)', team: 'ALN team', owner: 'Louisa', status: 'To do' },
+      { dateNeeded: '1 May 2026', phase: 'Go-Live', task: 'First FSM monthly payments + Metabase report live', team: '', owner: '', status: 'To do' },
+      { dateNeeded: 'May 2026', phase: 'Phased Rollouts', task: 'Advisory Services workshops (mid-May); term-time teams partially unavailable', team: '', owner: '', status: 'To do' },
+      { dateNeeded: 'June 2026', phase: 'Phased Rollouts', task: 'Parent portal priority (June/July); Pin Routes ready for transport tenders/contracts', team: 'CACI', owner: 'Kelly / Terry', status: 'To do' },
+      { dateNeeded: 'July 2026', phase: 'Phased Rollouts', task: 'Schools portal; full Welsh applications; full ALN/IDP; SCV; provider portal view (childcare)', team: '', owner: '', status: 'To do' },
+      { dateNeeded: 'Jul–Aug 2026', phase: 'Phased Rollouts', task: 'High application/transport volume peak; implementation challenging during holidays', team: '', owner: '', status: 'To do' },
+      { dateNeeded: 'Sep 2026', phase: 'Phased Rollouts', task: 'Parent portal must be live; Flying Start Welsh Government reports required', team: '', owner: '', status: 'To do' },
+      { dateNeeded: 'Sep–Dec 2026', phase: 'Autumn 2026', task: 'Provider portal (childcare) full; Professional portal (post-16 providers)', team: '', owner: '', status: 'To do' }
+    ];
+
+    function createPlanRow(data = { dateNeeded: '', phase: '', task: '', team: '', owner: '', status: 'To do' }) {
+      const rowIndex = document.querySelectorAll('#planTableBody tr').length + 1;
+      const tr = document.createElement('tr');
+      tr.className = 'group' + (data.status === 'Done' ? ' plan-row-done' : '');
+      tr.dataset.rowId = 'plan-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+      tr.innerHTML = `
+        <td class="px-2 py-3.5 align-middle">
+          <span class="row-drag-handle" draggable="true" aria-label="Drag to reorder">
+            <i data-feather="menu" class="w-4 h-4"></i>
+          </span>
+          <span class="row-num font-medium text-slate-500 tabular-nums ml-1">${rowIndex}</span>
+        </td>
+        <td class="px-5 py-3.5" contenteditable="true">${escapeHtml(data.dateNeeded)}</td>
+        <td class="px-5 py-3.5" contenteditable="true">${escapeHtml(data.phase)}</td>
+        <td class="px-5 py-3.5" contenteditable="true">${escapeHtml(data.task)}</td>
+        <td class="px-5 py-3.5" contenteditable="true">${escapeHtml(data.team)}</td>
+        <td class="px-5 py-3.5" contenteditable="true">${escapeHtml(data.owner)}</td>
+        <td class="px-5 py-3.5 text-center">
+          <select class="plan-status-select w-full px-2.5 py-1.5 rounded-lg text-sm border border-slate-200 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#006B5B]/50">
+            ${statusOptions.map(opt => `<option value="${opt.value}" ${data.status === opt.value ? 'selected' : ''}>${opt.label}</option>`).join('')}
+          </select>
+        </td>
+        <td class="px-5 py-3.5 text-center">
+          <button type="button" class="delete-row p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors" aria-label="Delete row">
+            <i data-feather="trash-2" class="w-4 h-4"></i>
+          </button>
+        </td>
+      `;
+      const statusSelect = tr.querySelector('.plan-status-select');
+      statusSelect.addEventListener('change', () => {
+        const isDone = statusSelect.value === 'Done';
+        if (isDone) {
+          tr.classList.add('plan-row-done');
+          planTableBody.appendChild(tr);
+          updatePlanRowNumbers();
+        } else {
+          tr.classList.remove('plan-row-done');
+        }
+        savePlan();
+      });
+      tr.querySelectorAll('[contenteditable="true"]').forEach(el => el.addEventListener('input', savePlan));
+      return tr;
+    }
+
+    function updatePlanRowNumbers() {
+      document.querySelectorAll('#planTableBody tr').forEach((tr, i) => {
+        const numEl = tr.querySelector('.row-num');
+        if (numEl) numEl.textContent = i + 1;
+      });
+    }
+
+    function getPlanData() {
+      return Array.from(document.querySelectorAll('#planTableBody tr')).map(tr => {
+        const c = tr.cells;
+        return {
+          dateNeeded: c[1].textContent.trim(),
+          phase: c[2].textContent.trim(),
+          task: c[3].textContent.trim(),
+          team: c[4].textContent.trim(),
+          owner: c[5].textContent.trim(),
+          status: (c[6].querySelector('.plan-status-select') || {}).value || 'To do'
+        };
+      });
+    }
+
+    function savePlan() {
+      localStorage.setItem(PLAN_TABLE_KEY, JSON.stringify(getPlanData()));
+    }
+
+    function renderPlanTable(data) {
+      const sorted = [...data].sort((a, b) => (a.status === 'Done' ? 1 : 0) - (b.status === 'Done' ? 1 : 0));
+      const tbody = document.getElementById('planTableBody');
+      tbody.innerHTML = '';
+      sorted.forEach(item => tbody.appendChild(createPlanRow(item)));
+      feather.replace();
+      updatePlanRowNumbers();
+    }
+
+    const planTableBody = document.getElementById('planTableBody');
+    const planSaved = localStorage.getItem(PLAN_TABLE_KEY);
+    renderPlanTable(planSaved ? JSON.parse(planSaved) : initialPlanData);
+
+    document.getElementById('planTableBody').addEventListener('click', (e) => {
+      const btn = e.target.closest('.delete-row');
+      if (!btn) return;
+      const tr = btn.closest('tr');
+      if (!tr) return;
+      e.preventDefault();
+      if (confirm('Delete this row?')) {
+        tr.remove();
+        updatePlanRowNumbers();
+        savePlan();
+      }
+    });
+
+    planTableBody.addEventListener('dragstart', (e) => {
+      const handle = e.target.closest('.row-drag-handle');
+      if (!handle) return;
+      const tr = handle.closest('tr');
+      if (!tr) return;
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', tr.dataset.rowId);
+      tr.classList.add('dragging');
+    });
+    planTableBody.addEventListener('dragover', (e) => {
+      const tr = e.target.closest('tr');
+      if (!tr || tr.classList.contains('dragging')) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      planTableBody.querySelectorAll('tr.drag-over').forEach(row => row.classList.remove('drag-over'));
+      tr.classList.add('drag-over');
+    });
+    planTableBody.addEventListener('dragleave', (e) => {
+      const tr = e.target.closest('tr');
+      if (tr && !tr.contains(e.relatedTarget)) tr.classList.remove('drag-over');
+    });
+    planTableBody.addEventListener('drop', (e) => {
+      e.preventDefault();
+      planTableBody.querySelectorAll('tr.drag-over').forEach(row => row.classList.remove('drag-over'));
+      const rowId = e.dataTransfer.getData('text/plain');
+      const dragged = planTableBody.querySelector(`tr[data-row-id="${rowId}"]`);
+      const target = e.target.closest('tr');
+      if (!dragged || !target || dragged === target) return;
+      planTableBody.insertBefore(dragged, target);
+      updatePlanRowNumbers();
+      savePlan();
+    });
+    planTableBody.addEventListener('dragend', (e) => {
+      if (e.target.closest('.row-drag-handle')) {
+        planTableBody.querySelectorAll('tr.dragging, tr.drag-over').forEach(row => row.classList.remove('dragging', 'drag-over'));
+      }
+    });
+
+    function isPlanTabActive() {
+      return document.getElementById('tab-plan').classList.contains('active');
+    }
+
+    // Tab switch: re-run feather icons when switching tabs so plan table icons render
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => setTimeout(() => feather.replace(), 50));
+    });
+
+    // Delete row: one listener on the table so it works for all rows (including newly added)
+    document.getElementById('tableBody').addEventListener('click', (e) => {
+      const btn = e.target.closest('.delete-row');
+      if (!btn) return;
+      const tr = btn.closest('tr');
+      if (!tr) return;
+      e.preventDefault();
+      if (confirm('Delete this row?')) {
+        tr.remove();
+        updateRowNumbers();
+        autoSave();
+      }
+    });
+
+    // Drag to reorder rows
+    const tableBody = document.getElementById('tableBody');
+    tableBody.addEventListener('dragstart', (e) => {
+      const handle = e.target.closest('.row-drag-handle');
+      if (!handle) return;
+      const tr = handle.closest('tr');
+      if (!tr) return;
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', tr.dataset.rowId);
+      tr.classList.add('dragging');
+    });
+
+    tableBody.addEventListener('dragover', (e) => {
+      const tr = e.target.closest('tr');
+      if (!tr || tr.classList.contains('dragging')) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      tableBody.querySelectorAll('tr.drag-over').forEach(row => row.classList.remove('drag-over'));
+      tr.classList.add('drag-over');
+    });
+
+    tableBody.addEventListener('dragleave', (e) => {
+      const tr = e.target.closest('tr');
+      if (tr && !tr.contains(e.relatedTarget)) tr.classList.remove('drag-over');
+    });
+
+    tableBody.addEventListener('drop', (e) => {
+      e.preventDefault();
+      tableBody.querySelectorAll('tr.drag-over').forEach(row => row.classList.remove('drag-over'));
+      const rowId = e.dataTransfer.getData('text/plain');
+      const draggedRow = tableBody.querySelector(`tr[data-row-id="${rowId}"]`);
+      const targetRow = e.target.closest('tr');
+      if (!draggedRow || !targetRow || draggedRow === targetRow) return;
+      tableBody.insertBefore(draggedRow, targetRow);
+      updateRowNumbers();
+      autoSave();
+    });
+
+    tableBody.addEventListener('dragend', (e) => {
+      if (e.target.closest('.row-drag-handle')) {
+        tableBody.querySelectorAll('tr.dragging, tr.drag-over').forEach(row => row.classList.remove('dragging', 'drag-over'));
+      }
+    });
+
+    // Header buttons: act on active tab (RAG or Plan)
+    document.getElementById('addRowBtn').addEventListener('click', () => {
+      if (isPlanTabActive()) {
+        planTableBody.appendChild(createPlanRow());
+        feather.replace();
+        updatePlanRowNumbers();
+        savePlan();
+      } else {
+        tableBody.appendChild(createRow());
+        feather.replace();
+        updateRowNumbers();
+        autoSave();
+      }
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      if (isPlanTabActive()) {
+        if (confirm('Reset plan to default? Your current plan data will be replaced.')) {
+          localStorage.removeItem(PLAN_TABLE_KEY);
+          renderPlanTable(initialPlanData);
+        }
+      } else {
+        if (confirm('Reset to default data? Your current data will be replaced.')) {
+          localStorage.removeItem(STORAGE_KEY);
+          renderTable(initialData);
+        }
+      }
+    });
+
+    function escapeCsvCell(v) {
+      return '"' + String(v ?? '').replace(/"/g, '""') + '"';
+    }
+    function downloadCsv(content, filename) {
+      const BOM = '\uFEFF';
+      const blob = new Blob([BOM + content], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+    function exportRiskRegisterCsv() {
+      const data = getCurrentData();
+      const headers = ['Category', 'RAG', 'Risk/Issue', 'Probability', 'Impact', 'Priority', 'Mitigation / Next Action', 'Owner', 'Due Date', 'Trend'];
+      const rowToCsv = (row) => {
+        const priority = getPriority(row.probability, row.impact);
+        const keys = ['dimension', 'rag', 'evidence', 'probability', 'impact', null, 'action', 'owner', 'due', 'trend'];
+        return headers.map((_, i) => escapeCsvCell(i === 5 ? priority.label : row[keys[i]])).join(',');
+      };
+      const csv = [headers.join(','), ...data.map(rowToCsv)].join('\r\n');
+      downloadCsv(csv, 'impulse-migration-risk-register.csv');
+    }
+    function exportPlanCsv() {
+      const data = getPlanData();
+      const headers = ['Date needed', 'Phase', 'Task / Activity', 'Team', 'Owner', 'Status'];
+      const keys = ['dateNeeded', 'phase', 'task', 'team', 'owner', 'status'];
+      const csv = [headers.join(','), ...data.map(row => keys.map(k => escapeCsvCell(row[k])).join(','))].join('\r\n');
+      downloadCsv(csv, 'impulse-migration-plan.csv');
+    }
+    document.getElementById('exportCsvBtn').addEventListener('click', () => {
+      if (isPlanTabActive()) {
+        exportPlanCsv();
+      } else {
+        exportRiskRegisterCsv();
+      }
+    });
+    document.getElementById('exportAllCsvBtn').addEventListener('click', () => {
+      exportRiskRegisterCsv();
+      setTimeout(() => exportPlanCsv(), 300);
+    });
+
+    document.getElementById('printBtn').addEventListener('click', () => window.print());
+  </script>
+</body>
+</html>
