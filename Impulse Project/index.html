@@ -386,7 +386,9 @@
         firebase.initializeApp(firebaseConfig);
         db = firebase.firestore();
         dashboardRef = db.collection('dashboard').doc('impulse');
-        if (db.enableIndexedDbPersistence) {
+        // Don’t use Firestore cache in Safari so it always gets fresh data from server (avoids stale table data)
+        window.impulseIsSafari = /Safari/.test(navigator.userAgent) && !/Chrome|Chromium|FxiOS/.test(navigator.userAgent);
+        if (db.enableIndexedDbPersistence && !window.impulseIsSafari) {
           db.enableIndexedDbPersistence({ experimentalForceOwningTab: true }).catch(() => {});
         }
       } catch (e) {
@@ -761,31 +763,50 @@
         }
         feather.replace();
       }
-      function tryApplyFromSnapshot(snap) {
+      var appliedServerData = false;
+      function tryApplyFromSnapshot(snap, allowCache) {
+        if (!allowCache && snap && snap.metadata && snap.metadata.fromCache)
+          return;
         var d = snap && snap.exists ? snap.data() : getLocalDashboard();
         if (!d) return;
-        // Don’t overwrite while user is typing in the dashboard (avoids stealing focus)
         var active = document.activeElement;
         if (active && (active.closest('#tableBody') || active.closest('#planTableBody') || active.closest('.project-tile')))
           return;
         applyDashboardData(d);
+        if (snap && snap.metadata && !snap.metadata.fromCache)
+          appliedServerData = true;
       }
 
       if (useFirebase && dashboardRef) {
-        // Prefer server on first load so Safari (and all browsers) get actual data, not empty cache
-        dashboardRef.get({ source: 'server' }).then(function(snap) {
-          tryApplyFromSnapshot(snap);
-        }).catch(function() {
-          // Offline or error: try cache, then localStorage
-          dashboardRef.get().then(function(snap) {
-            tryApplyFromSnapshot(snap);
+        // First load: server only so Safari and all browsers show live data, not stale cache
+        function loadFromServer() {
+          dashboardRef.get({ source: 'server' }).then(function(snap) {
+            tryApplyFromSnapshot(snap, true);
+            appliedServerData = true;
           }).catch(function() {
-            applyDashboardData(getLocalDashboard());
+            if (window.impulseIsSafari) {
+              // Safari: don’t use cache/localStorage fallback – retry server once, then show message
+              dashboardRef.get({ source: 'server' }).then(function(snap) {
+                tryApplyFromSnapshot(snap, true);
+                appliedServerData = true;
+              }).catch(function() {
+                applyDashboardData(getLocalDashboard());
+                console.warn('Impulse: Could not load from server. Data may be stale.');
+              });
+            } else {
+              dashboardRef.get().then(function(snap) {
+                tryApplyFromSnapshot(snap, true);
+                appliedServerData = true;
+              }).catch(function() {
+                applyDashboardData(getLocalDashboard());
+              });
+            }
           });
-        });
-        // Real-time updates: when Firestore data changes (other tab/user or our save), refresh the UI
+        }
+        loadFromServer();
+        // Live updates: only apply if from server, or if we’ve already shown server data (e.g. cache after reconnect)
         dashboardRef.onSnapshot(function(snap) {
-          tryApplyFromSnapshot(snap);
+          tryApplyFromSnapshot(snap, appliedServerData);
         }, function(err) {
           console.warn('Firestore snapshot error', err);
         });
