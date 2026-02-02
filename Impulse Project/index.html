@@ -253,25 +253,30 @@
             <button id="addRowBtn" class="bg-[#006B5B] hover:bg-[#00897B] text-white inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm">
               <i data-feather="plus" class="w-4 h-4"></i> Add row
             </button>
-            <button id="exportCsvBtn" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-              <i data-feather="download" class="w-4 h-4"></i> Export CSV
-            </button>
-            <button id="exportAllCsvBtn" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors" title="Export risk register and plan as two CSV files">
-              <i data-feather="download" class="w-4 h-4"></i> Export all
-            </button>
-            <button id="exportJsonBtn" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors" title="Export all data (risk register, plan, project tile) as one JSON file for backup or import elsewhere">
-              <i data-feather="archive" class="w-4 h-4"></i> Export JSON
-            </button>
-            <button id="importJsonBtn" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors" title="Import a previously exported JSON file to restore data on this device">
-              <i data-feather="upload" class="w-4 h-4"></i> Import JSON
-            </button>
-            <input type="file" id="importJsonInput" accept=".json,application/json" class="hidden" />
-            <button id="printBtn" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-              <i data-feather="printer" class="w-4 h-4"></i> Print
-            </button>
-            <button id="resetBtn" class="bg-white border border-slate-200 text-slate-600 hover:text-red-600 hover:border-red-200 hover:bg-red-50 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-              <i data-feather="rotate-ccw" class="w-4 h-4"></i> Reset
-            </button>
+            <div class="relative" id="headerMoreWrap">
+              <button type="button" id="moreBtn" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors" aria-haspopup="true" aria-expanded="false">
+                <i data-feather="more-horizontal" class="w-4 h-4"></i> More
+              </button>
+              <div id="headerDropdown" class="hidden absolute right-0 top-full mt-1 py-1 bg-white border border-slate-200 rounded-lg shadow-lg z-50 min-w-[200px]" role="menu">
+                <button type="button" id="exportCsvBtn" role="menuitem" class="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 inline-flex items-center gap-2 rounded-none" title="Export current tab as CSV">
+                  <i data-feather="download" class="w-4 h-4 text-slate-500"></i> Export CSV
+                </button>
+                <button type="button" id="exportAllCsvBtn" role="menuitem" class="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 inline-flex items-center gap-2 rounded-none" title="Export risk register and plan as two CSV files">
+                  <i data-feather="download" class="w-4 h-4 text-slate-500"></i> Export all
+                </button>
+                <button type="button" id="exportJsonBtn" role="menuitem" class="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 inline-flex items-center gap-2 rounded-none" title="Export all data as one JSON file">
+                  <i data-feather="archive" class="w-4 h-4 text-slate-500"></i> Export JSON
+                </button>
+                <button type="button" id="importJsonBtn" role="menuitem" class="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 inline-flex items-center gap-2 rounded-none" title="Import a JSON backup">
+                  <i data-feather="upload" class="w-4 h-4 text-slate-500"></i> Import JSON
+                </button>
+                <input type="file" id="importJsonInput" accept=".json,application/json" class="hidden" />
+                <div class="border-t border-slate-100 my-1"></div>
+                <button type="button" id="printBtn" role="menuitem" class="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 inline-flex items-center gap-2 rounded-none">
+                  <i data-feather="printer" class="w-4 h-4 text-slate-500"></i> Print
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -767,10 +772,16 @@
       }
 
       if (useFirebase && dashboardRef) {
-        dashboardRef.get().then(function(snap) {
+        // Prefer server on first load so Safari (and all browsers) get actual data, not empty cache
+        dashboardRef.get({ source: 'server' }).then(function(snap) {
           tryApplyFromSnapshot(snap);
         }).catch(function() {
-          applyDashboardData(getLocalDashboard());
+          // Offline or error: try cache, then localStorage
+          dashboardRef.get().then(function(snap) {
+            tryApplyFromSnapshot(snap);
+          }).catch(function() {
+            applyDashboardData(getLocalDashboard());
+          });
         });
         // Real-time updates: when Firestore data changes (other tab/user or our save), refresh the UI
         dashboardRef.onSnapshot(function(snap) {
@@ -916,20 +927,6 @@
       }
     });
 
-    document.getElementById('resetBtn').addEventListener('click', () => {
-      if (isPlanTabActive()) {
-        if (confirm('Reset plan to default? Your current plan data will be replaced.')) {
-          localStorage.removeItem(PLAN_TABLE_KEY);
-          renderPlanTable(initialPlanData);
-        }
-      } else {
-        if (confirm('Reset to default data? Your current data will be replaced.')) {
-          localStorage.removeItem(STORAGE_KEY);
-          renderTable(initialData);
-        }
-      }
-    });
-
     function escapeCsvCell(v) {
       return '"' + String(v ?? '').replace(/"/g, '""') + '"';
     }
@@ -960,6 +957,30 @@
       const csv = [headers.join(','), ...data.map(row => keys.map(k => escapeCsvCell(row[k])).join(','))].join('\r\n');
       downloadCsv(csv, 'impulse-migration-plan.csv');
     }
+    (function initMoreDropdown() {
+      var moreBtn = document.getElementById('moreBtn');
+      var dropdown = document.getElementById('headerDropdown');
+      var wrap = document.getElementById('headerMoreWrap');
+      if (!moreBtn || !dropdown) return;
+      moreBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var open = !dropdown.classList.contains('hidden');
+        dropdown.classList.toggle('hidden', open);
+        moreBtn.setAttribute('aria-expanded', !open);
+      });
+      document.addEventListener('click', function() {
+        dropdown.classList.add('hidden');
+        moreBtn.setAttribute('aria-expanded', 'false');
+      });
+      wrap.addEventListener('click', function(e) { e.stopPropagation(); });
+      dropdown.addEventListener('click', function(e) {
+        if (e.target.closest('[role="menuitem"]')) {
+          dropdown.classList.add('hidden');
+          moreBtn.setAttribute('aria-expanded', 'false');
+        }
+      });
+    })();
+
     document.getElementById('exportCsvBtn').addEventListener('click', () => {
       if (isPlanTabActive()) {
         exportPlanCsv();
