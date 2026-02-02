@@ -1,0 +1,10 @@
+rules_version = '2';
+// Impulse dashboard: allow anyone to read/write the shared dashboard.
+// Restrict in production if you add auth (e.g. allow read, write: if request.auth != null).
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /dashboard/{docId} {
+      allow read, write: if true;
+    }
+  }
+}

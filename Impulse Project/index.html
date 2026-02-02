@@ -351,11 +351,70 @@
     </main>
   </div>
 
+  <!-- Firebase: replace firebaseConfig with your project's config from Firebase Console > Project settings > Your apps -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <script>
     feather.replace();
 
     const STORAGE_KEY = 'impulse-rag-test';
+    const TILE_KEY = 'impulse-rag-tile';
+    const PLAN_TABLE_KEY = 'impulse-rag-plan-table';
+    const DASHBOARD_DOC_PATH = 'dashboard/impulse';
 
+    // Your Firebase project config (from Firebase Console > Project settings > Your apps)
+    const firebaseConfig = {
+      apiKey: 'AIzaSyB5bzrkZYZ0txvB7SPu1i5MXcR_GtJ7EaE',
+      authDomain: 'impulse-8b5c5.firebaseapp.com',
+      projectId: 'impulse-8b5c5',
+      storageBucket: 'impulse-8b5c5.firebasestorage.app',
+      messagingSenderId: '26103315783',
+      appId: '1:26103315783:web:c6077a453f4bfd399b6062',
+      measurementId: 'G-RX7JK5Z17B'
+    };
+
+    let db = null;
+    let dashboardRef = null;
+    const useFirebase = firebaseConfig && firebaseConfig.projectId && firebaseConfig.projectId !== 'YOUR_PROJECT_ID';
+    if (useFirebase && typeof firebase !== 'undefined') {
+      try {
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.firestore();
+        dashboardRef = db.collection('dashboard').doc('impulse');
+        if (db.enableIndexedDbPersistence) {
+          db.enableIndexedDbPersistence({ experimentalForceOwningTab: true }).catch(() => {});
+        }
+      } catch (e) {
+        console.warn('Firebase init failed', e);
+      }
+    }
+
+    function getFullDashboardFromDOM() {
+      const projectTitleEl = document.getElementById('projectTitle');
+      const projectSroEl = document.getElementById('projectSro');
+      const projectDeliveryLeadEl = document.getElementById('projectDeliveryLead');
+      return {
+        riskRegister: typeof getCurrentData === 'function' ? getCurrentData() : [],
+        plan: typeof getPlanData === 'function' ? getPlanData() : [],
+        projectTile: {
+          title: (projectTitleEl && projectTitleEl.textContent.trim()) || '',
+          sro: (projectSroEl && projectSroEl.textContent.trim()) || '',
+          deliveryLead: (projectDeliveryLeadEl && projectDeliveryLeadEl.textContent.trim()) || ''
+        }
+      };
+    }
+
+    let saveToFirebaseTimer = null;
+    function scheduleSaveToFirebase() {
+      if (!useFirebase || !dashboardRef) return;
+      clearTimeout(saveToFirebaseTimer);
+      saveToFirebaseTimer = setTimeout(() => {
+        const data = getFullDashboardFromDOM();
+        dashboardRef.set(data, { merge: true }).catch(err => console.warn('Firebase save failed', err));
+      }, 1200);
+    }
+  </script>
+  <script>
     const initialData = [
       { dimension:"Schedule / Timeline", rag:"Green", evidence:"All March training & data cuts on track; GOSS 14 Feb prepped. No slippage.", probability:1, impact:2, action:"Monitor summer peak (Jul–Sep).", owner:"Liz", due:"Ongoing", trend:"↑ Stable" },
       { dimension:"Data Migration & Cleanse", rag:"Amber", evidence:"Address cleanse meeting pending; spreadsheet inventory incomplete; exceptions not fully highlighted.", probability:4, impact:3, action:"Kick-off cleanse meeting this week; complete inventory by 10 Feb.", owner:"Lewis / Tom", due:"10 Feb 2026", trend:"↓ Worsening" },
@@ -527,6 +586,7 @@
 
     function autoSave() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(getCurrentData()));
+      scheduleSaveToFirebase();
     }
 
     function renderTable(data) {
@@ -538,25 +598,17 @@
       updateRowNumbers();
     }
 
-    // Load data
-    const saved = localStorage.getItem(STORAGE_KEY);
-    renderTable(saved ? JSON.parse(saved) : initialData);
-
-    // Project tile: load and save
-    const TILE_KEY = 'impulse-rag-tile';
+    // Project tile elements (used for load/save)
     const projectTitleEl = document.getElementById('projectTitle');
     const projectSroEl = document.getElementById('projectSro');
     const projectDeliveryLeadEl = document.getElementById('projectDeliveryLead');
-    const tileData = JSON.parse(localStorage.getItem(TILE_KEY) || '{}');
-    if (tileData.title != null) projectTitleEl.textContent = tileData.title;
-    if (tileData.sro != null) projectSroEl.textContent = tileData.sro;
-    if (tileData.deliveryLead != null) projectDeliveryLeadEl.textContent = tileData.deliveryLead;
     function saveTile() {
       localStorage.setItem(TILE_KEY, JSON.stringify({
         title: projectTitleEl.textContent.trim(),
         sro: projectSroEl.textContent.trim(),
         deliveryLead: projectDeliveryLeadEl.textContent.trim()
       }));
+      scheduleSaveToFirebase();
     }
     [projectTitleEl, projectSroEl, projectDeliveryLeadEl].forEach(el => {
       el.addEventListener('input', saveTile);
@@ -575,7 +627,6 @@
     });
 
     // Plan table (same construct as RAG: add/delete/drag/export/reset)
-    const PLAN_TABLE_KEY = 'impulse-rag-plan-table';
     const statusOptions = [
       { value: 'To do', label: 'To do' },
       { value: 'In progress', label: 'In progress' },
@@ -671,6 +722,7 @@
 
     function savePlan() {
       localStorage.setItem(PLAN_TABLE_KEY, JSON.stringify(getPlanData()));
+      scheduleSaveToFirebase();
     }
 
     function renderPlanTable(data) {
@@ -683,8 +735,53 @@
     }
 
     const planTableBody = document.getElementById('planTableBody');
-    const planSaved = localStorage.getItem(PLAN_TABLE_KEY);
-    renderPlanTable(planSaved ? JSON.parse(planSaved) : initialPlanData);
+
+    (function initDashboard() {
+      function getLocalDashboard() {
+        try {
+          return {
+            riskRegister: (function() { const s = localStorage.getItem(STORAGE_KEY); return s ? JSON.parse(s) : null; })(),
+            plan: (function() { const s = localStorage.getItem(PLAN_TABLE_KEY); return s ? JSON.parse(s) : null; })(),
+            projectTile: (function() { const s = localStorage.getItem(TILE_KEY); return s ? JSON.parse(s) : null; })()
+          };
+        } catch (e) { return {}; }
+      }
+      function applyDashboardData(d) {
+        renderTable(d && d.riskRegister && d.riskRegister.length ? d.riskRegister : initialData);
+        renderPlanTable(d && d.plan && d.plan.length ? d.plan : initialPlanData);
+        if (d && d.projectTile) {
+          if (d.projectTile.title != null) projectTitleEl.textContent = d.projectTile.title;
+          if (d.projectTile.sro != null) projectSroEl.textContent = d.projectTile.sro;
+          if (d.projectTile.deliveryLead != null) projectDeliveryLeadEl.textContent = d.projectTile.deliveryLead;
+        }
+        feather.replace();
+      }
+      function tryApplyFromSnapshot(snap) {
+        var d = snap && snap.exists ? snap.data() : getLocalDashboard();
+        if (!d) return;
+        // Don’t overwrite while user is typing in the dashboard (avoids stealing focus)
+        var active = document.activeElement;
+        if (active && (active.closest('#tableBody') || active.closest('#planTableBody') || active.closest('.project-tile')))
+          return;
+        applyDashboardData(d);
+      }
+
+      if (useFirebase && dashboardRef) {
+        dashboardRef.get().then(function(snap) {
+          tryApplyFromSnapshot(snap);
+        }).catch(function() {
+          applyDashboardData(getLocalDashboard());
+        });
+        // Real-time updates: when Firestore data changes (other tab/user or our save), refresh the UI
+        dashboardRef.onSnapshot(function(snap) {
+          tryApplyFromSnapshot(snap);
+        }, function(err) {
+          console.warn('Firestore snapshot error', err);
+        });
+      } else {
+        applyDashboardData(getLocalDashboard());
+      }
+    })();
 
     document.getElementById('planTableBody').addEventListener('click', (e) => {
       const btn = e.target.closest('.delete-row');
