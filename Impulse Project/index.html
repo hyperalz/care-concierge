@@ -259,6 +259,13 @@
             <button id="exportAllCsvBtn" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors" title="Export risk register and plan as two CSV files">
               <i data-feather="download" class="w-4 h-4"></i> Export all
             </button>
+            <button id="exportJsonBtn" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors" title="Export all data (risk register, plan, project tile) as one JSON file for backup or import elsewhere">
+              <i data-feather="archive" class="w-4 h-4"></i> Export JSON
+            </button>
+            <button id="importJsonBtn" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors" title="Import a previously exported JSON file to restore data on this device">
+              <i data-feather="upload" class="w-4 h-4"></i> Import JSON
+            </button>
+            <input type="file" id="importJsonInput" accept=".json,application/json" class="hidden" />
             <button id="printBtn" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
               <i data-feather="printer" class="w-4 h-4"></i> Print
             </button>
@@ -866,6 +873,65 @@
     document.getElementById('exportAllCsvBtn').addEventListener('click', () => {
       exportRiskRegisterCsv();
       setTimeout(() => exportPlanCsv(), 300);
+    });
+
+    function exportAllAsJson() {
+      const projectTitleEl = document.getElementById('projectTitle');
+      const projectSroEl = document.getElementById('projectSro');
+      const projectDeliveryLeadEl = document.getElementById('projectDeliveryLead');
+      const payload = {
+        riskRegister: getCurrentData(),
+        plan: getPlanData(),
+        projectTile: {
+          title: (projectTitleEl && projectTitleEl.textContent.trim()) || '',
+          sro: (projectSroEl && projectSroEl.textContent.trim()) || '',
+          deliveryLead: (projectDeliveryLeadEl && projectDeliveryLeadEl.textContent.trim()) || ''
+        }
+      };
+      const json = JSON.stringify(payload, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'impulse-dashboard-data.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+    document.getElementById('exportJsonBtn').addEventListener('click', () => exportAllAsJson());
+
+    document.getElementById('importJsonBtn').addEventListener('click', () => document.getElementById('importJsonInput').click());
+    document.getElementById('importJsonInput').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(reader.result);
+          if (data.riskRegister && Array.isArray(data.riskRegister)) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data.riskRegister));
+            renderTable(data.riskRegister);
+          }
+          if (data.plan && Array.isArray(data.plan)) {
+            localStorage.setItem(PLAN_TABLE_KEY, JSON.stringify(data.plan));
+            renderPlanTable(data.plan);
+          }
+          if (data.projectTile && typeof data.projectTile === 'object') {
+            const t = data.projectTile;
+            const projectTitleEl = document.getElementById('projectTitle');
+            const projectSroEl = document.getElementById('projectSro');
+            const projectDeliveryLeadEl = document.getElementById('projectDeliveryLead');
+            if (projectTitleEl && t.title != null) projectTitleEl.textContent = t.title;
+            if (projectSroEl && t.sro != null) projectSroEl.textContent = t.sro;
+            if (projectDeliveryLeadEl && t.deliveryLead != null) projectDeliveryLeadEl.textContent = t.deliveryLead;
+            localStorage.setItem('impulse-rag-tile', JSON.stringify({ title: t.title ?? '', sro: t.sro ?? '', deliveryLead: t.deliveryLead ?? '' }));
+          }
+          e.target.value = '';
+          alert('Data imported successfully.');
+        } catch (err) {
+          e.target.value = '';
+          alert('Invalid JSON file. Use a file exported from this app (Export JSON).');
+        }
+      };
+      reader.readAsText(file);
     });
 
     document.getElementById('printBtn').addEventListener('click', () => window.print());
