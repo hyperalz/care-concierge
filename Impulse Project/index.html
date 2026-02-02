@@ -325,10 +325,11 @@
               <thead>
                 <tr>
                   <th class="px-5 py-3.5 text-left w-14"></th>
-                  <th class="px-5 py-3.5 text-left min-w-[100px]">Date needed</th>
+                  <th class="px-5 py-3.5 text-left min-w-[120px]">Team</th>
                   <th class="px-5 py-3.5 text-left min-w-[140px]">Phase</th>
+                  <th class="px-5 py-3.5 text-left min-w-[100px]">Date needed</th>
                   <th class="px-5 py-3.5 text-left min-w-[220px]">Task / Activity</th>
-                  <th class="px-5 py-3.5 text-left w-28">Team</th>
+                  <th class="px-5 py-3.5 text-left min-w-[120px]">Workstream</th>
                   <th class="px-5 py-3.5 text-left w-28">Owner</th>
                   <th class="px-5 py-3.5 text-center min-w-[140px]">Status</th>
                   <th class="px-5 py-3.5 text-center w-16"></th>
@@ -594,7 +595,7 @@
       { dateNeeded: 'Sep–Dec 2026', phase: 'Autumn 2026', task: 'Provider portal (childcare) full; Professional portal (post-16 providers)', team: '', owner: '', status: 'To do' }
     ];
 
-    function createPlanRow(data = { dateNeeded: '', phase: '', task: '', team: '', owner: '', status: 'To do' }) {
+    function createPlanRow(data = { dateNeeded: '', phase: '', task: '', team: '', workstream: '', owner: '', status: 'To do' }) {
       const rowIndex = document.querySelectorAll('#planTableBody tr').length + 1;
       const tr = document.createElement('tr');
       tr.className = 'group' + (data.status === 'Done' ? ' plan-row-done' : '');
@@ -606,10 +607,11 @@
           </span>
           <span class="row-num font-medium text-slate-500 tabular-nums ml-1">${rowIndex}</span>
         </td>
-        <td class="px-5 py-3.5" contenteditable="true">${escapeHtml(data.dateNeeded)}</td>
-        <td class="px-5 py-3.5" contenteditable="true">${escapeHtml(data.phase)}</td>
-        <td class="px-5 py-3.5" contenteditable="true">${escapeHtml(data.task)}</td>
         <td class="px-5 py-3.5" contenteditable="true">${escapeHtml(data.team)}</td>
+        <td class="px-5 py-3.5" contenteditable="true">${escapeHtml(data.phase)}</td>
+        <td class="px-5 py-3.5" contenteditable="true">${escapeHtml(data.dateNeeded)}</td>
+        <td class="px-5 py-3.5" contenteditable="true">${escapeHtml(data.task)}</td>
+        <td class="px-5 py-3.5" contenteditable="true">${escapeHtml(data.workstream || '')}</td>
         <td class="px-5 py-3.5" contenteditable="true">${escapeHtml(data.owner)}</td>
         <td class="px-5 py-3.5 text-center">
           <select class="plan-status-select w-full px-2.5 py-1.5 rounded-lg text-sm border border-slate-200 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#006B5B]/50">
@@ -649,12 +651,13 @@
       return Array.from(document.querySelectorAll('#planTableBody tr')).map(tr => {
         const c = tr.cells;
         return {
-          dateNeeded: c[1].textContent.trim(),
+          team: c[1].textContent.trim(),
           phase: c[2].textContent.trim(),
-          task: c[3].textContent.trim(),
-          team: c[4].textContent.trim(),
-          owner: c[5].textContent.trim(),
-          status: (c[6].querySelector('.plan-status-select') || {}).value || 'To do'
+          dateNeeded: c[3].textContent.trim(),
+          task: c[4].textContent.trim(),
+          workstream: c[5].textContent.trim(),
+          owner: c[6].textContent.trim(),
+          status: (c[7].querySelector('.plan-status-select') || {}).value || 'To do'
         };
       });
     }
@@ -848,8 +851,8 @@
     }
     function exportPlanCsv() {
       const data = getPlanData();
-      const headers = ['Date needed', 'Phase', 'Task / Activity', 'Team', 'Owner', 'Status'];
-      const keys = ['dateNeeded', 'phase', 'task', 'team', 'owner', 'status'];
+      const headers = ['Team', 'Phase', 'Date needed', 'Task / Activity', 'Workstream', 'Owner', 'Status'];
+      const keys = ['team', 'phase', 'dateNeeded', 'task', 'workstream', 'owner', 'status'];
       const csv = [headers.join(','), ...data.map(row => keys.map(k => escapeCsvCell(row[k])).join(','))].join('\r\n');
       downloadCsv(csv, 'impulse-migration-plan.csv');
     }

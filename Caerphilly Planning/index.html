@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caerphilly Planning | G-Cloud Windows</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="hero">
+        <div class="container">
+            <p class="eyebrow">Demo Dashboard</p>
+            <h1>Caerphilly Planning</h1>
+            <p class="subtitle">
+                Implementation windows for G-Cloud platform rollouts, using Digital Marketplace data
+                to alert Caerphilly County Council about procurement deadlines.
+            </p>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="card">
+            <div class="card-header">
+                <h2>Connect to the API</h2>
+                <span class="pill secondary">Simple setup</span>
+            </div>
+            <p class="muted">
+                Paste an API endpoint and optional bearer token. This stays in your browser
+                for the demo and can be replaced later with live automation.
+            </p>
+            <form class="form-grid" id="api-form">
+                <label class="field">
+                    <span>API URL</span>
+                    <input type="url" id="api-url" value="http://127.0.0.1:5009/g-cloud/services/search?q=caerphilly" autocomplete="off">
+                </label>
+                <label class="field">
+                    <span>Bearer token (optional)</span>
+                    <input type="password" id="api-token" value="myToken" autocomplete="off">
+                </label>
+                <label class="field">
+                    <span>Buyer filter (optional)</span>
+                    <input type="text" id="buyer-filter" value="Caerphilly County Council" autocomplete="off">
+                </label>
+                <button class="button" type="submit">Load from API</button>
+            </form>
+            <p class="muted small" id="status-line">Loaded demo data.</p>
+            <div class="note">
+                <h3>Local API quick start</h3>
+                <ol>
+                    <li>Run the Digital Marketplace Search API locally (defaults to port 5009).</li>
+                    <li>Use the dev token <code>myToken</code> if you have not changed it.</li>
+                    <li>Click “Load from API” to replace demo data.</li>
+                </ol>
+                <p class="muted small">
+                    This demo reads the API directly in your browser. Keep it simple for GitHub Pages.
+                </p>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="card-header">
+                <h2>Caerphilly contract data</h2>
+                <span class="pill secondary">Manual input</span>
+            </div>
+            <p class="muted">
+                Paste Caerphilly-specific contract data to enrich the Digital Marketplace results.
+                Format: <code>supplier,contract_end,procurement_weeks,implementation_weeks</code>.
+            </p>
+            <textarea id="caerphilly-data" class="textarea" rows="6" placeholder="Example Cloud Ltd,2025-11-12,8,12"></textarea>
+            <div class="actions">
+                <button class="button ghost" id="apply-caerphilly">Apply Caerphilly data</button>
+                <span class="muted small">Defaults: procurement 8 weeks, implementation 12 weeks.</span>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="card-header">
+                <h2>Upcoming procurement windows</h2>
+                <span class="pill" id="data-pill">Demo data</span>
+            </div>
+            <div class="table" role="table" aria-label="Implementation windows">
+                <div class="row header" role="row">
+                    <div class="cell" role="columnheader">Supplier</div>
+                    <div class="cell" role="columnheader">Service</div>
+                    <div class="cell" role="columnheader">Contract ends</div>
+                    <div class="cell" role="columnheader">Procure</div>
+                    <div class="cell" role="columnheader">Implement</div>
+                    <div class="cell" role="columnheader">Buffer</div>
+                    <div class="cell" role="columnheader">Status</div>
+                </div>
+                <div id="table-body"></div>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="card-header">
+                <h2>Alerts</h2>
+                <span class="pill secondary">Next steps</span>
+            </div>
+            <ul class="alerts" id="alert-list"></ul>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <span class="muted">Caerphilly Planning demo • Digital Marketplace data</span>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
