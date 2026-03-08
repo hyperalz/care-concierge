@@ -265,7 +265,7 @@
                     </div>
                 </div>
 
-                <details class="govuk-details govuk-!-margin-bottom-4" open>
+                <details class="govuk-details govuk-!-margin-bottom-4">
                     <summary class="govuk-details__summary"><span class="govuk-details__summary-text">How scoring works</span></summary>
                     <div class="govuk-details__text govuk-!-padding-3" style="background:#f8f8f8;border:1px solid #b1b4b6">
                         <p class="govuk-body-s govuk-!-margin-bottom-1"><strong>1</strong> — Weak. Little or no evidence that the service meets this criterion.</p>
@@ -367,6 +367,38 @@
                             </div>
 
                             <p class="govuk-body-s">For cloud: G-Cloud (Digital Marketplace), Sell2Wales and CDP. <a href="https://www.crowncommercial.gov.uk/how-to-buy" target="_blank" rel="noopener" class="govuk-link">CCS How to buy (opens in new tab)</a></p>
+
+                            <div class="govuk-!-margin-top-6 govuk-!-padding-4" style="background:#f8f8f8;border:1px solid #b1b4b6">
+                                <h3 class="govuk-heading-s govuk-!-margin-bottom-2">Agreements you could use</h3>
+                                <p class="govuk-body govuk-!-margin-bottom-3">These Crown Commercial Service (CCS) agreements are available to the public sector. For cloud, use:</p>
+                                <ul class="govuk-list govuk-list--spaced govuk-!-margin-bottom-3">
+                                    <li><a href="https://www.crowncommercial.gov.uk/agreements/RM1557.14" target="_blank" rel="noopener" class="govuk-link">G-Cloud 14</a> — cloud hosting, software and support</li>
+                                    <li><a href="https://www.crowncommercial.gov.uk/agreements/RM6292" target="_blank" rel="noopener" class="govuk-link">Cloud Compute 2</a> — IaaS and PaaS</li>
+                                    <li><a href="https://www.crowncommercial.gov.uk/agreements/RM6262" target="_blank" rel="noopener" class="govuk-link">Crown Hosting II</a> — secure data centres</li>
+                                </ul>
+                                <p class="govuk-body-s govuk-!-margin-bottom-0">
+                                    <a href="https://www.crowncommercial.gov.uk/agreements" target="_blank" rel="noopener" class="govuk-link">Search all agreements on crowncommercial.gov.uk (opens in new tab)</a>
+                                </p>
+                                <details class="govuk-details govuk-!-margin-top-4">
+                                    <summary class="govuk-details__summary"><span class="govuk-details__summary-text">Show all CCS agreements</span></summary>
+                                    <div class="govuk-details__text govuk-!-margin-top-3">
+                                        <div style="max-height:320px;overflow-y:auto">
+                                            <table class="govuk-table" id="agreementsTable">
+                                                <caption class="govuk-table__caption govuk-visually-hidden">Crown Commercial Service agreements</caption>
+                                                <thead class="govuk-table__head">
+                                                    <tr class="govuk-table__row">
+                                                        <th scope="col" class="govuk-table__header govuk-!-width-two-thirds">Agreement</th>
+                                                        <th scope="col" class="govuk-table__header govuk-!-width-one-quarter">Agreement ID</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="govuk-table__body" id="agreementsList">
+                                                    <tr class="govuk-table__row"><td colspan="2" class="govuk-table__cell govuk-hint">Loading agreements…</td></tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </details>
+                            </div>
                         </div>
                     </details>
 
@@ -422,6 +454,7 @@
         <section class="govuk-!-margin-top-8 govuk-!-margin-bottom-6 govuk-!-padding-top-4" style="border-top:1px solid #b1b4b6">
             <h2 class="govuk-heading-s govuk-visually-hidden">Related guidance</h2>
             <p class="govuk-body-s">
+                <a href="https://www.crowncommercial.gov.uk/agreements" target="_blank" rel="noopener" class="govuk-link">CCS Search agreements (opens in new tab)</a> · 
                 <a href="https://www.crowncommercial.gov.uk/how-to-buy" target="_blank" rel="noopener" class="govuk-link">CCS How to buy (opens in new tab)</a> · 
                 <a href="https://www.caerphilly.gov.uk/my-council/strategies,-plans-and-policies/customer-and-digital-strategies-and-plans/programme-for-procurement/guiding-principles" target="_blank" rel="noopener" class="govuk-link">Caerphilly procurement (opens in new tab)</a> · 
                 <a href="https://www.caerphilly.gov.uk/business/tenders-and-procurement/procurement-reform" target="_blank" rel="noopener" class="govuk-link">Procurement reform (opens in new tab)</a> · 
@@ -747,6 +780,29 @@
                         });
                     }
                 } catch (_) {}
+            }
+            const agreementsEl = document.getElementById('agreementsList');
+            if (agreementsEl) {
+                try {
+                    const res = await fetch('cc-agreements.json');
+                    if (res.ok) {
+                        const agreements = await res.json();
+                        agreementsEl.innerHTML = agreements.map(a => {
+                            const title = String(a.title || a.name || '—').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                            const id = String(a.id || '—').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                            // CCS format: https://www.crowncommercial.gov.uk/agreements/{id}
+                            const url = (a.url || ('https://www.crowncommercial.gov.uk/agreements/' + encodeURIComponent(a.id || ''))).trim();
+                            const isValid = url && /^https:\/\/www\.crowncommercial\.gov\.uk\/agreements\/\S+/.test(url);
+                            const href = isValid ? ' href="' + url.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener noreferrer" title="' + url.replace(/"/g, '&quot;') + '"' : '';
+                            const nameCell = href ? '<a class="govuk-link"' + href + '>' + title + '</a>' : title;
+                            return '<tr class="govuk-table__row"><td class="govuk-table__cell">' + nameCell + '</td><td class="govuk-table__cell">' + id + '</td></tr>';
+                        }).join('');
+                    } else {
+                        agreementsEl.innerHTML = '<tr class="govuk-table__row"><td colspan="2" class="govuk-table__cell"><a href="https://www.crowncommercial.gov.uk/agreements" target="_blank" rel="noopener" class="govuk-link">Search agreements on crowncommercial.gov.uk (opens in new tab)</a></td></tr>';
+                    }
+                } catch (_) {
+                    agreementsEl.innerHTML = '<tr class="govuk-table__row"><td colspan="2" class="govuk-table__cell"><a href="https://www.crowncommercial.gov.uk/agreements" target="_blank" rel="noopener" class="govuk-link">Search agreements on crowncommercial.gov.uk (opens in new tab)</a></td></tr>';
+                }
             }
             updateOfferingLabel();
             updateEvalProgress();
