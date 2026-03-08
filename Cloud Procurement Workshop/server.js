@@ -89,15 +89,27 @@ function ruleBasedScoreHints(fullText) {
     hints.skills = '3';
   if (/\b(net zero|carbon|sustainability|ethical|environmental|iso14001)\b/.test(t))
     hints.sustainable = '3';
-  // WPPS criteria
-  if (/\b(gdpr|ncsc|iso.?27001|cyber essentials)\b/.test(t))
-    hints.compliance = '3';
-  if (/\b(data.?portability|data.?extract|exit|lock.?in)\b/.test(t))
-    hints.delivery = '3';
-  if (/\b(social value|local|sme|disability|inclusive)\b/.test(t))
-    hints.social = '3';
-  if (/\b(fair work|equal opportunit|transparency|workplace adjustment)\b/.test(t))
-    hints.fairWork = '3';
+  // WPPS principles (p1–p10)
+  if (/\b(collaborative|social value|local|sme|economic value)\b/.test(t))
+    hints.p1 = '3'; // Collaborative procurement
+  if (/\b(policy|integration|strategic)\b/.test(t))
+    hints.p2 = '3'; // Policy integration
+  if (/\b(sustainable|well.?being|best practice)\b/.test(t))
+    hints.p3 = '3'; // Sustainable procurement
+  if (/\b(profession|procurement team|capability)\b/.test(t))
+    hints.p4 = '3'; // Procurement profession
+  if (/\b(circular|foundational|local supply|resilient)\b/.test(t))
+    hints.p5 = '3'; // Progressive procurement
+  if (/\b(net zero|carbon|climate|decarbon|environmental|iso.?14001)\b/.test(t))
+    hints.p6 = '3'; // Climate action
+  if (/\b(stakeholder|innovative|engagement)\b/.test(t))
+    hints.p7 = '3'; // Stakeholder involvement
+  if (/\b(fair work|equal opportunit|ethical|modern slavery|transparency)\b/.test(t))
+    hints.p8 = '3'; // Fair Work
+  if (/\b(digital|data|user experience|integration|api)\b/.test(t))
+    hints.p9 = '3'; // Digital solutions
+  if (/\b(value.?for.?money|whole.?life|optimum|outcome)\b/.test(t))
+    hints.p10 = '3'; // Value-based procurement
   return hints;
 }
 
