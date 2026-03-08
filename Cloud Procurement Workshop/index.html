@@ -192,6 +192,32 @@
                     </ol>
                 </nav>
 
+                <!-- Service area -->
+                <div class="govuk-form-group govuk-!-margin-bottom-4">
+                    <label class="govuk-label" for="serviceArea">Which service area is this for?</label>
+                    <p class="govuk-hint">Helps with reporting and future guidance. Optional.</p>
+                    <select class="govuk-select govuk-input--width-20" id="serviceArea" name="serviceArea" aria-describedby="serviceAreaHint" onchange="updateAuditTrail()">
+                        <option value="">— Select (optional) —</option>
+                    </select>
+                    <span id="serviceAreaHint" class="govuk-visually-hidden">Select the Caerphilly service area this cloud procurement relates to</span>
+                </div>
+
+                <!-- Replace / change -->
+                <div class="govuk-form-group govuk-!-margin-bottom-4">
+                    <label class="govuk-label">What software are you looking to replace or change?</label>
+                    <p class="govuk-hint">Optional. Add the current supplier and product name.</p>
+                    <div class="govuk-grid-row govuk-!-margin-top-2">
+                        <div class="govuk-grid-column-one-half">
+                            <label class="govuk-label govuk-label--s" for="replaceSupplier">Supplier</label>
+                            <input type="text" id="replaceSupplier" class="govuk-input" name="replaceSupplier" placeholder="e.g. Microsoft" oninput="updateAuditTrail()">
+                        </div>
+                        <div class="govuk-grid-column-one-half">
+                            <label class="govuk-label govuk-label--s" for="replaceProduct">Product</label>
+                            <input type="text" id="replaceProduct" class="govuk-input" name="replaceProduct" placeholder="e.g. Office 365" oninput="updateAuditTrail()">
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Product bar -->
                 <div class="govuk-form-group govuk-!-padding-4 product-bar" style="background:#f3f2f1;border:1px solid #b1b4b6">
                     <label class="govuk-label" for="dmUrlInput">Find your cloud service</label>
@@ -367,6 +393,15 @@
                     </div>
                 </div>
 
+                <div id="audit-trail-section" class="govuk-!-margin-top-6 govuk-!-padding-5" style="background:#fff;border:1px solid #b1b4b6;border-left:4px solid #1d70b8">
+                    <div class="govuk-!-display-flex govuk-!-flex-wrap-wrap govuk-!-align-items-center govuk-!-margin-bottom-3" style="gap:12px">
+                        <h4 class="govuk-heading-s govuk-!-margin-0">Audit trail</h4>
+                        <button type="button" onclick="printAuditTrail()" class="govuk-button govuk-button--secondary govuk-!-margin-0">Print audit trail</button>
+                    </div>
+                    <p class="govuk-body-s govuk-!-margin-bottom-3">A record of this evaluation for your records.</p>
+                    <div id="auditTrailContent" class="govuk-body-s" style="font-family:monospace;white-space:pre-wrap;background:#f8f8f8;padding:16px;border:1px solid #b1b4b6;min-height:120px">No information captured yet.</div>
+                </div>
+
                 <div class="govuk-!-margin-top-6 govuk-grid-row">
                     <div class="govuk-grid-column-two-thirds">
                         <h4 class="govuk-heading-s govuk-!-margin-bottom-2">Next steps after evaluation</h4>
@@ -490,6 +525,7 @@
             const el = document.getElementById('vision-total');
             if (el) el.textContent = sum;
             updateEvalProgress();
+            updateAuditTrail();
         }
 
         function updateOfferingTotal() {
@@ -509,6 +545,7 @@
                 nameEl.textContent = (n && p) ? n + ' · ' + p : (n || p || '—');
             }
             updateEvalProgress();
+            updateAuditTrail();
         }
 
         function updateOfferingLabel() {
@@ -577,11 +614,65 @@
                 txt.textContent = labels.length ? labels.join(', ') : '';
                 out.classList.toggle('hidden', labels.length === 0);
             }
+            updateAuditTrail();
+        }
+
+        function updateAuditTrail() {
+            const el = document.getElementById('auditTrailContent');
+            if (!el) return;
+            const lines = [];
+            lines.push('Cloud Procurement — Audit Trail');
+            lines.push('Generated: ' + new Date().toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }));
+            lines.push('');
+            const serviceArea = document.getElementById('serviceArea')?.value?.trim();
+            if (serviceArea) lines.push('Service area: ' + serviceArea);
+            const replaceSupplier = document.getElementById('replaceSupplier')?.value?.trim();
+            const replaceProduct = document.getElementById('replaceProduct')?.value?.trim();
+            if (replaceSupplier || replaceProduct) {
+                lines.push('Replacing/ changing: ' + [replaceSupplier, replaceProduct].filter(Boolean).join(' — '));
+            }
+            const offering = document.getElementById('offeringLabelText')?.textContent?.trim();
+            if (offering && offering !== '—') {
+                lines.push('Evaluating: ' + offering);
+            }
+            const vision = document.getElementById('vision-total')?.textContent;
+            const criteria = document.getElementById('total-offering')?.textContent;
+            if (vision !== undefined || criteria !== undefined) {
+                lines.push('Vision total: ' + (vision || '0') + '  |  Criteria total: ' + (criteria || '0'));
+            }
+            document.querySelectorAll('#recommendation-checkboxes input:checked').forEach(cb => {
+                const lblEl = cb.id ? document.querySelector('label[for="' + cb.id + '"]') : cb.closest('label');
+                const lbl = lblEl?.textContent?.trim();
+                if (lbl) lines.push('Recommendation: ' + lbl);
+            });
+            if (lines.length <= 3) {
+                el.textContent = 'No information captured yet.';
+                return;
+            }
+            el.textContent = lines.join('\n');
+        }
+
+        function printAuditTrail() {
+            const content = document.getElementById('auditTrailContent')?.textContent;
+            if (!content || content === 'No information captured yet.') {
+                window.alert('Add some information first — the audit trail will appear as you fill in the form.');
+                return;
+            }
+            const w = window.open('', '_blank', 'width=600,height=500');
+            w.document.write('<!DOCTYPE html><html><head><title>Audit trail</title><style>body{font-family:GDS Transport,arial,sans-serif;padding:24px;font-size:14px;line-height:1.5}pre{white-space:pre-wrap;word-wrap:break-word;margin:0}</style></head><body><pre>' + content.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre></body></html>');
+            w.document.close();
+            w.focus();
+            w.print();
         }
 
         function exportChecklist() {
             const parts = [];
             parts.push('Cloud Procurement Workshop – ' + new Date().toISOString().slice(0, 10));
+            const serviceArea = document.getElementById('serviceArea')?.value?.trim();
+            if (serviceArea) parts.push('Service area: ' + serviceArea);
+            const replaceSupplier = document.getElementById('replaceSupplier')?.value?.trim();
+            const replaceProduct = document.getElementById('replaceProduct')?.value?.trim();
+            if (replaceSupplier || replaceProduct) parts.push('Replacing/ changing: ' + [replaceSupplier, replaceProduct].filter(Boolean).join(' — '));
             parts.push('Product: ' + (document.getElementById('offeringLabelText')?.textContent || '—'));
             parts.push('Vision: ' + (document.getElementById('vision-total')?.textContent || '0'));
             parts.push('Criteria: ' + (document.getElementById('total-offering')?.textContent || '0'));
@@ -641,9 +732,25 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            const sel = document.getElementById('serviceArea');
+            if (sel) {
+                try {
+                    const res = await fetch('caerphilly-services-cleaned.json');
+                    if (res.ok) {
+                        const list = await res.json();
+                        list.forEach(name => {
+                            const opt = document.createElement('option');
+                            opt.value = name;
+                            opt.textContent = name;
+                            sel.appendChild(opt);
+                        });
+                    }
+                } catch (_) {}
+            }
             updateOfferingLabel();
             updateEvalProgress();
+            updateAuditTrail();
         });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/govuk-frontend@5.9.0/dist/govuk/govuk-frontend.min.js"></script>
