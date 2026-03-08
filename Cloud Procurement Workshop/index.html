@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en" class="govuk-template">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluate cloud services for Caerphilly — Cloud Procurement Workshop</title>
+    <!-- GOV.UK from CDN; works without npm start. Use /govuk/ in package when running server -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/govuk-frontend@5.9.0/dist/govuk/govuk-frontend.min.css">
+    <style>
+        /* Font override: GOV.UK expects /assets/; load from CDN instead */
+        @font-face{font-family:GDS Transport;font-style:normal;font-weight:400;src:url(https://cdn.jsdelivr.net/npm/govuk-frontend@5.9.0/dist/govuk/assets/fonts/light-94a07e06a1-v2.woff2) format("woff2"),url(https://cdn.jsdelivr.net/npm/govuk-frontend@5.9.0/dist/govuk/assets/fonts/light-f591b13f7d-v2.woff) format("woff");font-display:swap}
+        @font-face{font-family:GDS Transport;font-style:normal;font-weight:700;src:url(https://cdn.jsdelivr.net/npm/govuk-frontend@5.9.0/dist/govuk/assets/fonts/bold-b542beb274-v2.woff2) format("woff2"),url(https://cdn.jsdelivr.net/npm/govuk-frontend@5.9.0/dist/govuk/assets/fonts/bold-affa96571d-v2.woff) format("woff");font-display:swap}
+        html, body { background: #fff !important; font-family: GDS Transport, arial, sans-serif; }
+        .govuk-template { background: #f8f8f8 !important; }
+        .govuk-template__body { background: #fff !important; }
+        main { background: #fff !important; }
+        .workshop-header { background: #1d70b8; color: #fff; padding: 15px 0; }
+        .workshop-header .govuk-heading-m { color: #fff; margin: 0; }
+        .progress-bar { transition: width 0.5s ease-in-out; }
+        .checkbox-custom:checked + .checkbox-box { background-color: #1d70b8; border-color: #1d70b8; }
+        .checkbox-custom:checked + .checkbox-box svg { display: block; }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+        .govuk-tabs__list { border-bottom: 1px solid #b1b4b6; margin: 0; padding: 0; list-style: none; display: flex; gap: 0; }
+        .govuk-tabs__tab { border: 0; background: 0; cursor: pointer; font-family: GDS Transport, arial, sans-serif; font-size: 16px; padding: 10px 20px; margin-bottom: -1px; color: #505a5f; white-space: nowrap; }
+        .govuk-tabs__list-item--selected .govuk-tabs__tab { border-bottom: 2px solid #1d70b8; color: #1d70b8; font-weight: 700; }
+        .govuk-tabs__list-item:not(.govuk-tabs__list-item--selected) .govuk-tabs__tab { border-bottom: 2px solid transparent; }
+        .step-dot { width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; text-decoration: none; }
+        .step-dot.done { background: #1d70b8; color: #fff; border: 2px solid #1d70b8; }
+        .step-dot.current { background: #fff; color: #1d70b8; border: 2px solid #1d70b8; }
+        .step-dot.pending { background: #f3f2f1; color: #505a5f; border: 2px solid #b1b4b6; }
+        .definitions-sidebar { max-height: calc(100vh - 220px); overflow-y: auto; }
+        .hidden { display: none !important; }
+        .score-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+        .score-btn { width: 32px; height: 32px; min-width: 32px; padding: 0; font-size: 12px; font-family: monospace; border: 2px solid #1d70b8; background: #fff; cursor: pointer; border-radius: 4px; }
+        .score-btn:hover { background: #f3f2f1; }
+        .product-bar__url-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 16px; margin-top: 8px; }
+        .product-bar__url-row .govuk-input { max-width: 100%; }
+        .product-bar__divider { border-top: 1px solid #b1b4b6; margin: 24px 0; }
+        .product-bar__fields { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 16px 20px; }
+        .product-bar__field { margin: 0; flex-shrink: 0; }
+        .product-bar__actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+        .product-bar__assessing { padding-top: 4px; font-family: GDS Transport, arial, sans-serif; }
+    </style>
+</head>
+<body class="govuk-template__body">
+    <a href="#main-content" class="govuk-skip-link">Skip to main content</a>
+
+    <header class="workshop-header govuk-!-padding-top-4 govuk-!-padding-bottom-4" role="banner">
+        <div class="govuk-width-container">
+            <h1 class="govuk-heading-m govuk-!-margin-bottom-1" style="color:#fff">Cloud Procurement</h1>
+            <p class="govuk-body-s govuk-!-margin-0" style="color:rgba(255,255,255,0.9)">Evaluate cloud services against Digital Vision 2027 and WPPS criteria</p>
+        </div>
+    </header>
+
+    <div class="govuk-width-container">
+        <nav aria-label="Primary navigation" class="govuk-!-padding-top-3 govuk-!-padding-bottom-0">
+            <ul class="govuk-tabs__list" role="tablist">
+                <li class="govuk-tabs__list-item govuk-tabs__list-item--selected" role="presentation">
+                    <button id="tab-btn-cloud-options" onclick="showTab('cloud-options')" class="govuk-tabs__tab" role="tab" aria-selected="true" type="button">Cloud options</button>
+                </li>
+                <li class="govuk-tabs__list-item" role="presentation">
+                    <button id="tab-btn-reference" onclick="showTab('reference')" class="govuk-tabs__tab" role="tab" aria-selected="false" type="button">Reference</button>
+                </li>
+                <li class="govuk-tabs__list-item" role="presentation">
+                    <button id="tab-btn-tool" onclick="showTab('tool')" class="govuk-tabs__tab" role="tab" aria-selected="false" type="button">Evaluate</button>
+                </li>
+            </ul>
+        </nav>
+
+        <main id="main-content" class="govuk-main-wrapper govuk-main-wrapper--auto-spacing govuk-!-padding-top-6 govuk-!-padding-bottom-9" role="main">
+        <!-- Tab: Cloud Options -->
+        <div id="tab-cloud-options" class="tab-panel active">
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-two-thirds">
+                <h2 class="govuk-heading-l govuk-!-margin-bottom-4">Understanding cloud for procurement</h2>
+                <p class="govuk-body">Cloud means your data and applications run on someone else's servers, over the internet. You pay for what you use. Many of us already use cloud services — email, document storage, or collaboration tools.</p>
+                <p class="govuk-body govuk-!-margin-top-2">Cloud can give you flexibility to scale up or down, stronger security, and often lower cost because you only pay for what you use.</p>
+
+                <h3 class="govuk-heading-m govuk-!-margin-top-6 govuk-!-margin-bottom-3">How cloud is delivered</h3>
+                <div class="govuk-grid-row govuk-!-margin-bottom-6">
+                    <div class="govuk-grid-column-one-third">
+                        <div class="govuk-body govuk-!-padding-4" style="background:#f3f2f1;border-left:4px solid #1d70b8">
+                            <h4 class="govuk-heading-s govuk-!-margin-bottom-2">Public cloud</h4>
+                            <p class="govuk-body-s govuk-!-margin-0">You share infrastructure with other organisations. Providers include Amazon, Google and Microsoft. Anyone can sign up and start using it.</p>
+                        </div>
+                    </div>
+                    <div class="govuk-grid-column-one-third">
+                        <div class="govuk-body govuk-!-padding-4" style="background:#f3f2f1;border-left:4px solid #1d70b8">
+                            <h4 class="govuk-heading-s govuk-!-margin-bottom-2">Private cloud</h4>
+                            <p class="govuk-body-s govuk-!-margin-0">The infrastructure serves your organisation only. You get more control. It can sit in your own data centre or be hosted elsewhere.</p>
+                        </div>
+                    </div>
+                    <div class="govuk-grid-column-one-third">
+                        <div class="govuk-body govuk-!-padding-4" style="background:#f3f2f1;border-left:4px solid #1d70b8">
+                            <h4 class="govuk-heading-s govuk-!-margin-bottom-2">Hybrid cloud</h4>
+                            <p class="govuk-body-s govuk-!-margin-0">A mix of public, private and on-premise systems. Keep sensitive data on private cloud. Use public cloud for general workloads.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="govuk-heading-m govuk-!-margin-top-6 govuk-!-margin-bottom-3">What you can buy (service types)</h3>
+                <p class="govuk-body govuk-!-margin-bottom-4">From basic infrastructure to ready-made applications:</p>
+
+                <div class="govuk-inset-text govuk-!-margin-bottom-4" style="border-left-color:#1d70b8">
+                    <h4 class="govuk-heading-s govuk-!-margin-bottom-2">IaaS — Infrastructure as a Service</h4>
+                    <p class="govuk-body govuk-!-margin-bottom-2">You get servers, storage and networking. You manage the operating system, applications and data. Pay for what you use.</p>
+                    <p class="govuk-body-s govuk-!-margin-0">Examples: AWS, Microsoft Azure, Google Cloud. Use for web hosting, app development, databases and disaster recovery.</p>
+                </div>
+                <div class="govuk-inset-text govuk-!-margin-bottom-4" style="border-left-color:#1d70b8">
+                    <h4 class="govuk-heading-s govuk-!-margin-bottom-2">PaaS — Platform as a Service</h4>
+                    <p class="govuk-body govuk-!-margin-bottom-2">The provider runs the infrastructure and platform. You build and run your applications on top. You focus on code.</p>
+                    <p class="govuk-body-s govuk-!-margin-0">Examples: Heroku, Google App Engine. Use for building web apps, mobile apps and automation.</p>
+                </div>
+                <div class="govuk-inset-text govuk-!-margin-bottom-4" style="border-left-color:#f47738">
+                    <h4 class="govuk-heading-s govuk-!-margin-bottom-2">SaaS — Software as a Service</h4>
+                    <p class="govuk-body govuk-!-margin-bottom-2">Ready-to-use applications over the internet. You subscribe. Minimal setup — this is the most common type for councils.</p>
+                    <p class="govuk-body-s govuk-!-margin-0">Examples: Office 365, Google Workspace, Salesforce. Use for email, collaboration, CRM and project management.</p>
+                </div>
+                <div class="govuk-inset-text govuk-!-margin-bottom-6" style="border-left-color:#505a5f">
+                    <h4 class="govuk-heading-s govuk-!-margin-bottom-2">FaaS — Function as a Service (serverless)</h4>
+                    <p class="govuk-body govuk-!-margin-bottom-2">Run code without managing servers. It runs when triggered — for example when someone uploads a file or calls an API.</p>
+                    <p class="govuk-body-s govuk-!-margin-0">Examples: AWS Lambda, Azure Functions. Use for image processing, data pipelines and small automated tasks.</p>
+                </div>
+
+                <div class="govuk-notification-banner govuk-notification-banner--success govuk-!-margin-bottom-6" role="region" style="border-color:#00703c">
+                    <div class="govuk-notification-banner__header"><h3 class="govuk-notification-banner__title">Next step</h3></div>
+                    <div class="govuk-notification-banner__content">
+                        <p class="govuk-body govuk-!-margin-bottom-2">Evaluate a cloud service against Vision 2027 and WPPS criteria.</p>
+                        <button onclick="showTab('tool')" class="govuk-button govuk-!-margin-bottom-0">Evaluate a service</button>
+                    </div>
+                </div>
+
+                <p class="govuk-body-s govuk-!-margin-top-4">Sources: <a href="https://www.executech.com/insights/what-is-the-cloud-types-of-cloud-services/" target="_blank" rel="noopener" class="govuk-link">Executech — What is the Cloud? (opens in new tab)</a>, <a href="https://www.spec-india.com/blog/cloud-computing-platforms" target="_blank" rel="noopener" class="govuk-link">SPEC INDIA — Cloud Computing Platforms (opens in new tab)</a></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Reference (Definitions & Sources) -->
+        <div id="tab-reference" class="tab-panel">
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-two-thirds">
+                <h2 class="govuk-heading-l govuk-!-margin-bottom-4">Definitions and sources</h2>
+                <p class="govuk-body govuk-!-margin-bottom-6">Use this reference when evaluating cloud services. Each section explains the criteria and where to find more information.</p>
+
+                <div class="govuk-inset-text govuk-!-margin-bottom-4" style="border-left-color:#00703c">
+                    <h3 class="govuk-heading-s govuk-!-margin-bottom-2">Vision 2027</h3>
+                    <p class="govuk-body govuk-!-margin-bottom-2">Caerphilly's Digital Vision 2027 has six strategic themes. Use them to check how well a cloud service fits council priorities: Citizen-Centric, Efficiency, Resilience, Net Zero, Innovation, Collaboration.</p>
+                    <a href="https://www.caerphilly.gov.uk/my-council/strategies,-plans-and-policies/strategaethau-a-chynlluniau-cwsmeriaid-a-digidol/strategaethau-a-chynllun-gweithredu-cwsmeriaid-a-d" target="_blank" rel="noopener" class="govuk-link">Customer and Digital strategies (opens in new tab)</a>
+                </div>
+
+                <div class="govuk-inset-text govuk-!-margin-bottom-4" style="border-left-color:#1d70b8">
+                    <h3 class="govuk-heading-s govuk-!-margin-bottom-2">Procurement reform (CDP / WDP)</h3>
+                    <p class="govuk-body govuk-!-margin-bottom-2">The Procurement Act 2023 sets out how we buy. Check that the service is on an approved framework, follows open and fair processes, and meets guiding principles like value over lowest price.</p>
+                    <a href="https://www.caerphilly.gov.uk/business/tenders-and-procurement/procurement-reform" target="_blank" rel="noopener" class="govuk-link">Procurement reform (opens in new tab)</a>
+                </div>
+
+                <div class="govuk-inset-text govuk-!-margin-bottom-4" style="border-left-color:#f47738">
+                    <h3 class="govuk-heading-s govuk-!-margin-bottom-2">Procurement criteria (Welsh Procurement Policy Statement)</h3>
+                    <p class="govuk-body govuk-!-margin-bottom-3">Score services against value for money, quality, social value, sustainability, fair work, delivery and compliance. Quality matters more than lowest price.</p>
+                    <table class="govuk-table govuk-!-margin-bottom-3">
+                        <thead class="govuk-table__head"><tr class="govuk-table__row"><th class="govuk-table__header">Criterion</th><th class="govuk-table__header">Definition</th></tr></thead>
+                        <tbody class="govuk-table__body">
+                            <tr class="govuk-table__row"><td class="govuk-table__cell govuk-!-font-weight-bold">VfM</td><td class="govuk-table__cell">Whole-life cost, quality, suitability, cost-effectiveness</td></tr>
+                            <tr class="govuk-table__row"><td class="govuk-table__cell govuk-!-font-weight-bold">Quality</td><td class="govuk-table__cell">Technical &amp; professional ability, capacity</td></tr>
+                            <tr class="govuk-table__row"><td class="govuk-table__cell govuk-!-font-weight-bold">Social value</td><td class="govuk-table__cell">Community benefits, local jobs, SMEs, vulnerable populations</td></tr>
+                            <tr class="govuk-table__row"><td class="govuk-table__cell govuk-!-font-weight-bold">Sustainability</td><td class="govuk-table__cell">Decarbonisation, environmental impact, circular economy</td></tr>
+                            <tr class="govuk-table__row"><td class="govuk-table__cell govuk-!-font-weight-bold">Fair Work</td><td class="govuk-table__cell">Equal opportunities, ethical supply chains, transparency</td></tr>
+                            <tr class="govuk-table__row"><td class="govuk-table__cell govuk-!-font-weight-bold">Delivery</td><td class="govuk-table__cell">Risk management, exit, portability</td></tr>
+                            <tr class="govuk-table__row"><td class="govuk-table__cell govuk-!-font-weight-bold">Compliance</td><td class="govuk-table__cell">Financial &amp; legal standing</td></tr>
+                        </tbody>
+                    </table>
+                    <p class="govuk-body-s govuk-!-margin-0"><a href="https://www.gov.wales/procurement-policy-statement-html" target="_blank" rel="noopener" class="govuk-link">Welsh Procurement Policy Statement (opens in new tab)</a>. <a href="https://www.sell2wales.gov.wales/helpandresources/website" target="_blank" rel="noopener" class="govuk-link">Sell2Wales help (opens in new tab)</a></p>
+                </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Evaluate -->
+        <div id="tab-tool" class="tab-panel">
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-full">
+                <p class="govuk-body govuk-!-margin-bottom-4">Enter or find a cloud service below. Then score it against Vision 2027 and the Welsh Procurement Policy Statement criteria.</p>
+
+                <nav class="govuk-!-margin-bottom-6" aria-label="Contents">
+                    <h2 class="govuk-heading-s govuk-!-margin-bottom-2">Contents</h2>
+                    <ol class="govuk-list govuk-list--number">
+                        <li><a href="#eval-step-1" class="govuk-link">Vision 2027 alignment</a></li>
+                        <li><a href="#eval-step-2" class="govuk-link">Procurement criteria</a></li>
+                        <li><a href="#eval-step-3" class="govuk-link">Route to market</a></li>
+                        <li><a href="#eval-step-4" class="govuk-link">Recommendation</a></li>
+                    </ol>
+                </nav>
+
+                <!-- Product bar -->
+                <div class="govuk-form-group govuk-!-padding-4 product-bar" style="background:#f3f2f1;border:1px solid #b1b4b6">
+                    <label class="govuk-label" for="dmUrlInput">Find your cloud service</label>
+                    <p class="govuk-hint govuk-!-margin-bottom-3">Paste the Digital Marketplace URL for the service you want to evaluate.</p>
+                    <div class="product-bar__url-row">
+                        <input type="url" id="dmUrlInput" placeholder="https://www.applytosupply.digitalmarketplace.service.gov.uk/..." class="govuk-input govuk-input--width-30" style="flex:1;min-width:0" aria-describedby="dmUrlHint">
+                        <button type="button" id="fetchDmBtn" onclick="fetchAndPopulate()" class="govuk-button govuk-button--secondary govuk-!-margin-left-2">Fetch details</button>
+                        <span id="fetchDmStatus" class="govuk-body-s govuk-!-margin-left-2 govuk-!-align-self-center"></span>
+                    </div>
+                    <p id="dmUrlHint" class="govuk-hint govuk-!-margin-top-3 govuk-!-margin-bottom-0">Search <a href="https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/search?lot=cloud-hosting" target="_blank" rel="noopener" class="govuk-link">Cloud hosting</a>, <a href="https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/search?lot=cloud-software" target="_blank" rel="noopener" class="govuk-link">Cloud software</a> or <a href="https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/search" target="_blank" rel="noopener" class="govuk-link">all G-Cloud services</a>. Open a service page, copy its URL and paste it above.</p>
+
+                    <div class="product-bar__divider"></div>
+
+                    <div class="product-bar__fields">
+                        <div class="govuk-form-group product-bar__field">
+                            <span class="govuk-label govuk-!-display-block govuk-body-s">Product</span>
+                            <span id="offeringName" class="govuk-body">—</span>
+                        </div>
+                        <div class="govuk-form-group product-bar__field">
+                            <span class="govuk-label govuk-!-display-block govuk-body-s">Supplier</span>
+                            <span id="offeringProvider" class="govuk-body">—</span>
+                        </div>
+                        <div class="govuk-form-group product-bar__field">
+                            <span class="govuk-label govuk-!-display-block govuk-body-s">Service type</span>
+                            <span id="serviceTypeDisplay" class="govuk-body">—</span>
+                        </div>
+                        <div class="product-bar__actions">
+                            <button onclick="updateOfferingLabel(); applyAutoScore(); updateEvalProgress();" class="govuk-button">Set</button>
+                            <a id="dmLookupLink" href="https://www.digitalmarketplace.service.gov.uk/g-cloud/search" target="_blank" rel="noopener" class="govuk-link" style="white-space:nowrap">Look up ↗</a>
+                        </div>
+                    </div>
+                    <span id="offeringLabelText" class="hidden" aria-hidden="true">—</span>
+                    <div class="govuk-!-margin-top-4" aria-label="Evaluation steps">
+                        <p class="govuk-body-s govuk-!-margin-bottom-2">Complete these 4 steps to evaluate the service:</p>
+                        <div class="govuk-!-display-flex govuk-!-flex-wrap-wrap govuk-!-align-items-center" style="gap: 8px 16px;">
+                            <a href="#eval-step-1" class="step-dot pending" id="step-dot-1" onclick="focusEvalStep(1); return false;" title="Step 1: Vision 2027 alignment">1</a>
+                            <span class="govuk-body-s" style="color:#505a5f">Vision</span>
+                            <a href="#eval-step-2" class="step-dot pending" id="step-dot-2" onclick="focusEvalStep(2); return false;" title="Step 2: Procurement criteria">2</a>
+                            <span class="govuk-body-s" style="color:#505a5f">Criteria</span>
+                            <a href="#eval-step-3" class="step-dot pending" id="step-dot-3" onclick="focusEvalStep(3); return false;" title="Step 3: Route to market">3</a>
+                            <span class="govuk-body-s" style="color:#505a5f">Route</span>
+                            <a href="#eval-step-4" class="step-dot pending" id="step-dot-4" onclick="focusEvalStep(4); return false;" title="Step 4: Recommendation">4</a>
+                            <span class="govuk-body-s" style="color:#505a5f">Recommend</span>
+                        </div>
+                    </div>
+                </div>
+
+                <details class="govuk-details govuk-!-margin-bottom-4" open>
+                    <summary class="govuk-details__summary"><span class="govuk-details__summary-text">How scoring works</span></summary>
+                    <div class="govuk-details__text govuk-!-padding-3" style="background:#f8f8f8;border:1px solid #b1b4b6">
+                        <p class="govuk-body-s govuk-!-margin-bottom-1"><strong>1</strong> — Weak. Little or no evidence that the service meets this criterion.</p>
+                        <p class="govuk-body-s govuk-!-margin-bottom-1"><strong>2</strong> — Adequate. Some evidence, but gaps or limitations.</p>
+                        <p class="govuk-body-s govuk-!-margin-bottom-1"><strong>3</strong> — Good. Clear evidence. Meets expectations.</p>
+                        <p class="govuk-body-s govuk-!-margin-bottom-2"><strong>4</strong> — Excellent. Strong evidence. Exceeds expectations.</p>
+                        <p class="govuk-body-s govuk-!-margin-0 govuk-!-padding-top-2" style="border-top:1px solid #b1b4b6">If you use Fetch, suggested scores come from keyword detection on the service page. Always review and adjust — the tool cannot judge context or strength of evidence.</p>
+                    </div>
+                </details>
+
+                <details class="govuk-details govuk-!-margin-bottom-4">
+                    <summary class="govuk-details__summary"><span class="govuk-details__summary-text">Definitions — what you're scoring</span></summary>
+                    <div class="govuk-details__text govuk-!-padding-4" style="background:#f8f8f8;border:1px solid #b1b4b6">
+                        <h4 class="govuk-heading-s govuk-!-margin-bottom-2">Vision 2027 themes</h4>
+                        <ul class="govuk-list govuk-list--bullet govuk-body-s govuk-!-margin-bottom-4">
+                            <li><strong>Citizen-Centric</strong> — Puts resident needs first. Easy to access and use.</li>
+                            <li><strong>Efficiency</strong> — Streamlines work. Reduces waste. Uses automation.</li>
+                            <li><strong>Resilience</strong> — Stays available. Backs up data. Recovers quickly.</li>
+                            <li><strong>Net Zero</strong> — Cuts carbon. Reduces environmental impact.</li>
+                            <li><strong>Innovation</strong> — Modern. Flexible. Adapts as needs change.</li>
+                            <li><strong>Collaboration</strong> — Works with other systems. Shares data safely.</li>
+                        </ul>
+                        <h4 class="govuk-heading-s govuk-!-margin-bottom-2">Procurement criteria (WPPS)</h4>
+                        <ul class="govuk-list govuk-list--bullet govuk-body-s govuk-!-margin-bottom-4">
+                            <li><strong>VfM</strong> — Whole-life cost. Suitability. Cost-effectiveness.</li>
+                            <li><strong>Quality</strong> — Technical ability. Capacity to deliver.</li>
+                            <li><strong>Social value</strong> — Community benefits. Local jobs. SME support.</li>
+                            <li><strong>Sustainability</strong> — Decarbonisation. Circular economy.</li>
+                            <li><strong>Fair Work</strong> — Equal opportunities. Ethical supply chains.</li>
+                            <li><strong>Delivery</strong> — Risk management. Exit strategy. Data portability.</li>
+                            <li><strong>Compliance</strong> — Sound financial and legal standing.</li>
+                        </ul>
+                        <h4 class="govuk-heading-s govuk-!-margin-bottom-2">Route to market</h4>
+                        <p class="govuk-body-s govuk-!-margin-0">Framework, DPS, dynamic market or catalogue. For cloud: G-Cloud, Sell2Wales, CDP. <a href="https://www.crowncommercial.gov.uk/how-to-buy" target="_blank" rel="noopener" class="govuk-link">CCS How to buy (opens in new tab)</a></p>
+                    </div>
+                </details>
+
+                <div class="eval-accordion govuk-!-margin-bottom-4">
+                    <details id="eval-step-1" class="govuk-details eval-step-details govuk-!-margin-bottom-2">
+                        <summary class="govuk-details__summary"><span class="govuk-details__summary-text">1. How does it align with Vision 2027?</span></summary>
+                        <div class="govuk-details__text govuk-!-padding-4">
+                            <p class="govuk-body-s govuk-!-margin-bottom-3">Citizen-Centric, Efficiency, Resilience, Net Zero, Innovation, Collaboration. Score 1 (weak) to 4 (excellent) for each.</p>
+                            <div class="govuk-grid-row">
+                                <div class="govuk-grid-column-one-third govuk-!-margin-bottom-2"><div class="score-row"><span class="govuk-body-s">Citizen-Centric</span><button class="theme-btn criterion-btn score-btn" data-theme="citizen" onclick="cycleCriterionScore(this); updateVisionTotal();">-</button></div></div>
+                                <div class="govuk-grid-column-one-third govuk-!-margin-bottom-2"><div class="score-row"><span class="govuk-body-s">Efficiency</span><button class="theme-btn criterion-btn score-btn" data-theme="efficiency" onclick="cycleCriterionScore(this); updateVisionTotal();">-</button></div></div>
+                                <div class="govuk-grid-column-one-third govuk-!-margin-bottom-2"><div class="score-row"><span class="govuk-body-s">Resilience</span><button class="theme-btn criterion-btn score-btn" data-theme="resilience" onclick="cycleCriterionScore(this); updateVisionTotal();">-</button></div></div>
+                                <div class="govuk-grid-column-one-third govuk-!-margin-bottom-2"><div class="score-row"><span class="govuk-body-s" style="color:#00703c">Net Zero</span><button class="theme-btn criterion-btn score-btn" data-theme="netzero" onclick="cycleCriterionScore(this); updateVisionTotal();">-</button></div></div>
+                                <div class="govuk-grid-column-one-third govuk-!-margin-bottom-2"><div class="score-row"><span class="govuk-body-s">Innovation</span><button class="theme-btn criterion-btn score-btn" data-theme="innovation" onclick="cycleCriterionScore(this); updateVisionTotal();">-</button></div></div>
+                                <div class="govuk-grid-column-one-third govuk-!-margin-bottom-2"><div class="score-row"><span class="govuk-body-s">Collaboration</span><button class="theme-btn criterion-btn score-btn" data-theme="collab" onclick="cycleCriterionScore(this); updateVisionTotal();">-</button></div></div>
+                            </div>
+                            <div class="govuk-!-padding-top-2 govuk-!-margin-top-2" style="border-top:1px solid #b1b4b6"><span class="govuk-body-s govuk-!-margin-right-2">Total</span><span id="vision-total" class="govuk-body govuk-!-font-weight-bold">0</span></div>
+                        </div>
+                    </details>
+
+                    <details id="eval-step-2" class="govuk-details eval-step-details govuk-!-margin-bottom-2">
+                        <summary class="govuk-details__summary"><span class="govuk-details__summary-text">2. How does it score on procurement criteria?</span></summary>
+                        <div class="govuk-details__text govuk-!-padding-4">
+                            <p class="govuk-body-s govuk-!-margin-bottom-3">VfM (whole-life cost), Quality (technical ability), Social value (community, SMEs), Sustainability (decarbonisation), Fair Work (ethical supply chains), Delivery (risk, exit, portability), Compliance (financial and legal standing).</p>
+                            <div style="display:flex;flex-wrap:wrap;gap:12px">
+                                <div style="text-align:center;min-width:70px"><span class="govuk-body-s govuk-!-display-block">VfM</span><button class="criterion-btn score-btn govuk-!-margin-top-1" data-criterion="vfm" onclick="cycleCriterionScore(this); updateOfferingTotal();">-</button></div>
+                                <div style="text-align:center;min-width:70px"><span class="govuk-body-s govuk-!-display-block">Quality</span><button class="criterion-btn score-btn govuk-!-margin-top-1" data-criterion="quality" onclick="cycleCriterionScore(this); updateOfferingTotal();">-</button></div>
+                                <div style="text-align:center;min-width:70px"><span class="govuk-body-s govuk-!-display-block">Social</span><button class="criterion-btn score-btn govuk-!-margin-top-1" data-criterion="social" onclick="cycleCriterionScore(this); updateOfferingTotal();">-</button></div>
+                                <div style="text-align:center;min-width:70px"><span class="govuk-body-s govuk-!-display-block" style="color:#00703c">Sustain</span><button class="criterion-btn score-btn govuk-!-margin-top-1" data-criterion="sustainability" onclick="cycleCriterionScore(this); updateOfferingTotal();">-</button></div>
+                                <div style="text-align:center;min-width:70px"><span class="govuk-body-s govuk-!-display-block">Fair Work</span><button class="criterion-btn score-btn govuk-!-margin-top-1" data-criterion="fairwork" onclick="cycleCriterionScore(this); updateOfferingTotal();">-</button></div>
+                                <div style="text-align:center;min-width:70px"><span class="govuk-body-s govuk-!-display-block">Delivery</span><button class="criterion-btn score-btn govuk-!-margin-top-1" data-criterion="delivery" onclick="cycleCriterionScore(this); updateOfferingTotal();">-</button></div>
+                                <div style="text-align:center;min-width:70px"><span class="govuk-body-s govuk-!-display-block">Compliance</span><button class="criterion-btn score-btn govuk-!-margin-top-1" data-criterion="compliance" onclick="cycleCriterionScore(this); updateOfferingTotal();">-</button></div>
+                            </div>
+                            <div class="govuk-!-padding-top-2 govuk-!-margin-top-3" style="border-top:1px solid #b1b4b6"><span class="govuk-body-s govuk-!-margin-right-2">Total <span id="totalOfferingName">—</span></span><span id="total-offering" class="govuk-body govuk-!-font-weight-bold">0</span></div>
+                        </div>
+                    </details>
+
+                    <details id="eval-step-3" class="govuk-details eval-step-details govuk-!-margin-bottom-2">
+                        <summary class="govuk-details__summary"><span class="govuk-details__summary-text">3. How will you buy it? (route to market)</span></summary>
+                        <div class="govuk-details__text govuk-!-padding-4">
+                            <p class="govuk-body govuk-!-margin-bottom-4">Choose the route that best fits your needs. All routes use pre-approved suppliers so you buy compliantly.</p>
+
+                            <div class="govuk-!-margin-bottom-4" style="background:#f3f2f1;border-left:4px solid #1d70b8;padding:16px">
+                                <h4 class="govuk-heading-s govuk-!-margin-bottom-2">Framework</h4>
+                                <p class="govuk-body-s govuk-!-margin-bottom-2">Pre-approved suppliers. Direct award or further competition. Open and closed frameworks under <a href="https://www.crowncommercial.gov.uk/how-to-buy/frameworks" target="_blank" rel="noopener" class="govuk-link">Procurement Act 2023 (opens in new tab)</a>.</p>
+                                <p class="govuk-body-s govuk-!-margin-bottom-0"><strong>Pros:</strong> Established. Standard terms. <strong>Cons:</strong> Closed frameworks — no new suppliers after award.</p>
+                            </div>
+
+                            <div class="govuk-!-margin-bottom-4" style="background:#f3f2f1;border-left:4px solid #1d70b8;padding:16px">
+                                <h4 class="govuk-heading-s govuk-!-margin-bottom-2">Dynamic Purchasing System (DPS)</h4>
+                                <p class="govuk-body-s govuk-!-margin-bottom-2">Suppliers can join at any time. <a href="https://www.crowncommercial.gov.uk/how-to-buy/dynamic-purchasing-systems-dps" target="_blank" rel="noopener" class="govuk-link">Buy through a DPS (opens in new tab)</a>.</p>
+                                <p class="govuk-body-s govuk-!-margin-bottom-0"><strong>Pros:</strong> New suppliers add competition. Flexible. <strong>Cons:</strong> No direct award. Further competition only.</p>
+                            </div>
+
+                            <div class="govuk-!-margin-bottom-4" style="background:#f3f2f1;border-left:4px solid #1d70b8;padding:16px">
+                                <h4 class="govuk-heading-s govuk-!-margin-bottom-2">Dynamic market</h4>
+                                <p class="govuk-body-s govuk-!-margin-bottom-2">New under Procurement Act 2023. Market stays open. <a href="https://www.crowncommercial.gov.uk/how-to-buy/dynamic-market" target="_blank" rel="noopener" class="govuk-link">Buy through a dynamic market (opens in new tab)</a>.</p>
+                                <p class="govuk-body-s govuk-!-margin-bottom-0"><strong>Pros:</strong> Innovation. New suppliers join anytime. <strong>Cons:</strong> Above-threshold only. More steps than catalogue.</p>
+                            </div>
+
+                            <div class="govuk-!-margin-bottom-4" style="background:#f3f2f1;border-left:4px solid #1d70b8;padding:16px">
+                                <h4 class="govuk-heading-s govuk-!-margin-bottom-2">Catalogue</h4>
+                                <p class="govuk-body-s govuk-!-margin-bottom-2">Simple purchases. Order online for quick delivery. <a href="https://www.crowncommercial.gov.uk/catalogues" target="_blank" rel="noopener" class="govuk-link">CCS catalogues (opens in new tab)</a>.</p>
+                                <p class="govuk-body-s govuk-!-margin-bottom-0"><strong>Pros:</strong> Fast. Fixed prices. <strong>Cons:</strong> Simple items only. Not for complex cloud services.</p>
+                            </div>
+
+                            <p class="govuk-body-s">For cloud: G-Cloud (Digital Marketplace), Sell2Wales and CDP. <a href="https://www.crowncommercial.gov.uk/how-to-buy" target="_blank" rel="noopener" class="govuk-link">CCS How to buy (opens in new tab)</a></p>
+                        </div>
+                    </details>
+
+                    <details id="eval-step-4" class="govuk-details eval-step-details govuk-!-margin-bottom-2">
+                        <summary class="govuk-details__summary"><span class="govuk-details__summary-text">4. What is your recommendation?</span></summary>
+                        <div class="govuk-details__text govuk-!-padding-4">
+                            <div id="recommendation-checkboxes" class="govuk-!-margin-bottom-3">
+                                <div class="govuk-checkboxes govuk-checkboxes--small">
+                                    <div class="govuk-checkboxes__item govuk-!-margin-bottom-2"><input type="checkbox" id="rec-gcloud" class="govuk-checkboxes__input" onchange="updateRecommendation()"><label for="rec-gcloud" class="govuk-label govuk-checkboxes__label govuk-!-padding-left-3">G-Cloud hybrid</label></div>
+                                    <div class="govuk-checkboxes__item govuk-!-margin-bottom-2"><input type="checkbox" id="rec-analytics" class="govuk-checkboxes__input" onchange="updateRecommendation()"><label for="rec-analytics" class="govuk-label govuk-checkboxes__label govuk-!-padding-left-3">Pilot: Analytics</label></div>
+                                    <div class="govuk-checkboxes__item"><input type="checkbox" id="rec-citizen" class="govuk-checkboxes__input" onchange="updateRecommendation()"><label for="rec-citizen" class="govuk-label govuk-checkboxes__label govuk-!-padding-left-3">Pilot: Citizen tools</label></div>
+                                </div>
+                            </div>
+                            <div id="recommendationOutput" class="govuk-inset-text govuk-!-margin-top-3 hidden" style="border-left-color:#00703c"><strong>Recommendation:</strong> <span id="recText"></span></div>
+                        </div>
+                    </details>
+                </div>
+
+                <div class="govuk-!-margin-top-6 govuk-!-padding-5" style="background:#f3f2f1;border:1px solid #b1b4b6">
+                    <h4 class="govuk-heading-s govuk-!-margin-bottom-3">Your evaluation summary</h4>
+                    <div class="govuk-body-s">
+                        <span class="govuk-!-margin-right-4">Vision: <strong id="sum-vision">-</strong></span>
+                        <span>Criteria: <strong id="sum-criteria">0</strong></span>
+                    </div>
+                </div>
+
+                <div class="govuk-!-margin-top-6 govuk-grid-row">
+                    <div class="govuk-grid-column-two-thirds">
+                        <h4 class="govuk-heading-s govuk-!-margin-bottom-2">Next steps after evaluation</h4>
+                        <ul class="govuk-list govuk-list--bullet govuk-body-s">
+                            <li>Draft procurement templates for shortlisted services</li>
+                            <li>Validate choices against G-Cloud market</li>
+                            <li>Embed Vision 2027 principles in specification</li>
+                        </ul>
+                    </div>
+                    <div class="govuk-grid-column-one-third">
+                        <button onclick="exportChecklist()" class="govuk-button">Export</button>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+
+        <section class="govuk-!-margin-top-8 govuk-!-margin-bottom-6 govuk-!-padding-top-4" style="border-top:1px solid #b1b4b6">
+            <h2 class="govuk-heading-s govuk-visually-hidden">Related guidance</h2>
+            <p class="govuk-body-s">
+                <a href="https://www.crowncommercial.gov.uk/how-to-buy" target="_blank" rel="noopener" class="govuk-link">CCS How to buy (opens in new tab)</a> · 
+                <a href="https://www.caerphilly.gov.uk/my-council/strategies,-plans-and-policies/customer-and-digital-strategies-and-plans/programme-for-procurement/guiding-principles" target="_blank" rel="noopener" class="govuk-link">Caerphilly procurement (opens in new tab)</a> · 
+                <a href="https://www.caerphilly.gov.uk/business/tenders-and-procurement/procurement-reform" target="_blank" rel="noopener" class="govuk-link">Procurement reform (opens in new tab)</a> · 
+                <a href="https://www.sell2wales.gov.wales/helpandresources/website" target="_blank" rel="noopener" class="govuk-link">Sell2Wales (opens in new tab)</a> · 
+                <a href="https://www.gov.uk/government/publications/cloud-guide-for-the-public-sector/cloud-guide-for-the-public-sector" target="_blank" rel="noopener" class="govuk-link">GOV.UK cloud guide (opens in new tab)</a>
+            </p>
+        </section>
+        </main>
+    </div>
+
+    <script>
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('[id^="tab-btn-"]').forEach(b => {
+                b.setAttribute('aria-selected', 'false');
+                b.classList.remove('govuk-tabs__tab--selected');
+                const li = b.closest('.govuk-tabs__list-item');
+                if (li) li.classList.remove('govuk-tabs__list-item--selected');
+            });
+            const panel = document.getElementById('tab-' + tabName);
+            const btn = document.getElementById('tab-btn-' + tabName);
+            if (panel) panel.classList.add('active');
+            if (btn) {
+                btn.setAttribute('aria-selected', 'true');
+                btn.classList.add('govuk-tabs__tab--selected');
+                const li = btn.closest('.govuk-tabs__list-item');
+                if (li) li.classList.add('govuk-tabs__list-item--selected');
+            }
+            if (tabName === 'tool' && typeof updateEvalProgress === 'function') updateEvalProgress();
+        }
+
+        const timers = {};
+        const totalDuration = 55;
+
+        function startTimer(id, minutes) {
+            if (timers[id]) clearInterval(timers[id]);
+            let seconds = minutes * 60;
+            const display = document.getElementById(`timer-${id}`);
+            const endTime = Date.now() + (seconds * 1000);
+            timers[id] = setInterval(() => {
+                const remaining = Math.ceil((endTime - Date.now()) / 1000);
+                if (remaining <= 0) {
+                    clearInterval(timers[id]);
+                    display.textContent = "00:00";
+                    display.classList.add('timer-pulse', 'text-red-600', 'border-red-500');
+                    return;
+                }
+                const mins = Math.floor(remaining / 60);
+                const secs = remaining % 60;
+                display.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+                updateMainProgress();
+            }, 1000);
+        }
+
+        function pauseTimer(id) {
+            if (timers[id]) { clearInterval(timers[id]); timers[id] = null; }
+        }
+
+        function updateMainProgress() {
+            let elapsed = 0;
+            [1, 2].forEach(i => {
+                const el = document.getElementById('timer-' + i);
+                if (el && el.textContent !== '00:00' && !el.textContent.startsWith('-')) {
+                    const parts = el.textContent.split(':');
+                    elapsed += parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+                }
+            });
+            const pct = Math.min(100, (elapsed / totalDuration) * 100);
+            const bar = document.getElementById('progressBar');
+            const txt = document.getElementById('mainTimer');
+            if (bar) bar.style.width = pct + '%';
+            if (txt) txt.textContent = `${Math.floor(elapsed / 60)}:${(elapsed % 60).toString().padStart(2, '0')} / ${totalDuration}:00`;
+        }
+
+        function focusSection(n) { document.getElementById('section-' + n)?.scrollIntoView({ behavior: 'smooth' }); }
+
+        function focusEvalStep(n) {
+            document.querySelectorAll('.eval-step-details').forEach(d => { d.open = false; });
+            const el = document.getElementById('eval-step-' + n);
+            if (el) { el.open = true; el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+        }
+
+        const SCORE_CYCLE = ['-', '1', '2', '3', '4'];
+        function cycleCriterionScore(btn) {
+            const i = SCORE_CYCLE.indexOf(btn.textContent);
+            btn.textContent = SCORE_CYCLE[(i + 1) % SCORE_CYCLE.length];
+        }
+        function cycleDimScore(btn) {
+            const i = SCORE_CYCLE.indexOf(btn.textContent);
+            btn.textContent = SCORE_CYCLE[(i + 1) % SCORE_CYCLE.length];
+        }
+
+        function updateVisionTotal() {
+            let sum = 0;
+            document.querySelectorAll('.theme-btn.criterion-btn').forEach(b => {
+                const v = parseInt(b.textContent, 10);
+                if (!isNaN(v)) sum += v;
+            });
+            const el = document.getElementById('vision-total');
+            if (el) el.textContent = sum;
+            updateEvalProgress();
+        }
+
+        function updateOfferingTotal() {
+            let sum = 0;
+            document.querySelectorAll('.criterion-btn[data-criterion]').forEach(b => {
+                const v = parseInt(b.textContent, 10);
+                if (!isNaN(v)) sum += v;
+            });
+            const el = document.getElementById('total-offering');
+            const nameEl = document.getElementById('totalOfferingName');
+            if (el) el.textContent = sum;
+            if (nameEl) {
+                const nRaw = document.getElementById('offeringName')?.textContent?.trim();
+                const pRaw = document.getElementById('offeringProvider')?.textContent?.trim();
+                const n = (nRaw && nRaw !== '—') ? nRaw : '';
+                const p = (pRaw && pRaw !== '—') ? pRaw : '';
+                nameEl.textContent = (n && p) ? n + ' · ' + p : (n || p || '—');
+            }
+            updateEvalProgress();
+        }
+
+        function updateOfferingLabel() {
+            const nRaw = document.getElementById('offeringName')?.textContent?.trim();
+            const pRaw = document.getElementById('offeringProvider')?.textContent?.trim();
+            const n = (nRaw && nRaw !== '—') ? nRaw : '';
+            const p = (pRaw && pRaw !== '—') ? pRaw : '';
+            const el = document.getElementById('offeringLabelText');
+            if (el) el.textContent = (n && p) ? n + ' · ' + p : (n || p || '—');
+            updateOfferingTotal();
+        }
+
+        let cachedScoreHints = {};
+        let lastFetchedFramework = '';
+        function applyAutoScore() {
+            const hints = cachedScoreHints;
+
+            const themeMap = { citizenCentric: 'citizen', efficiency: 'efficiency', resilience: 'resilience', netZero: 'netzero', innovation: 'innovation', collaboration: 'collab' };
+            Object.keys(themeMap).forEach(k => {
+                if (hints[k]) {
+                    document.querySelectorAll('.theme-btn[data-theme="' + themeMap[k] + '"]').forEach(b => { if (b.textContent === '-') b.textContent = hints[k]; });
+                }
+            });
+
+            const criterionMap = { netZero: 'sustainability', sustainability: 'sustainability', compliance: 'compliance', social: 'social', fairWork: 'fairwork', delivery: 'delivery', quality: 'quality' };
+            Object.keys(criterionMap).forEach(k => {
+                if (hints[k]) {
+                    document.querySelectorAll('.criterion-btn[data-criterion="' + criterionMap[k] + '"]').forEach(b => { if (b.textContent === '-') b.textContent = hints[k]; });
+                }
+            });
+
+            updateVisionTotal();
+            updateOfferingTotal();
+        }
+
+        function updateEvalProgress() {
+            let vision = 0, criteria = 0;
+            document.querySelectorAll('.theme-btn.criterion-btn').forEach(b => { const v = parseInt(b.textContent, 10); if (!isNaN(v)) vision += v; });
+            document.querySelectorAll('.criterion-btn[data-criterion]').forEach(b => { const v = parseInt(b.textContent, 10); if (!isNaN(v)) criteria += v; });
+
+            const sv = document.getElementById('sum-vision'); if (sv) sv.textContent = vision > 0 ? vision : '-';
+            const scr = document.getElementById('sum-criteria'); if (scr) scr.textContent = criteria;
+
+            const step3Done = vision > 0 && criteria > 0;
+            for (let i = 1; i <= 4; i++) {
+                const dot = document.getElementById('step-dot-' + i);
+                if (!dot) continue;
+                dot.classList.remove('done', 'current', 'pending');
+                if (i === 1) dot.classList.add(vision > 0 ? 'done' : 'current');
+                else if (i === 2) dot.classList.add(vision > 0 ? (criteria > 0 ? 'done' : 'current') : 'pending');
+                else if (i === 3) dot.classList.add(step3Done ? 'done' : 'pending');
+                else dot.classList.add(step3Done ? 'current' : 'pending');
+            }
+        }
+
+        function updateRecommendation() {
+            const labels = [];
+            document.querySelectorAll('#recommendation-checkboxes input:checked').forEach(cb => {
+                const lblEl = cb.id ? document.querySelector('label[for="' + cb.id + '"]') : cb.closest('label');
+                const lbl = lblEl?.textContent?.trim();
+                if (lbl) labels.push(lbl);
+            });
+            const out = document.getElementById('recommendationOutput');
+            const txt = document.getElementById('recText');
+            if (out && txt) {
+                txt.textContent = labels.length ? labels.join(', ') : '';
+                out.classList.toggle('hidden', labels.length === 0);
+            }
+        }
+
+        function exportChecklist() {
+            const parts = [];
+            parts.push('Cloud Procurement Workshop – ' + new Date().toISOString().slice(0, 10));
+            parts.push('Product: ' + (document.getElementById('offeringLabelText')?.textContent || '—'));
+            parts.push('Vision: ' + (document.getElementById('vision-total')?.textContent || '0'));
+            parts.push('Criteria: ' + (document.getElementById('total-offering')?.textContent || '0'));
+            document.querySelectorAll('#recommendation-checkboxes input:checked').forEach(cb => {
+                const lblEl = cb.id ? document.querySelector('label[for="' + cb.id + '"]') : cb.closest('label');
+                const lbl = lblEl?.textContent?.trim();
+                if (lbl) parts.push('Recommendation: ' + lbl);
+            });
+            const blob = new Blob([parts.join('\n')], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'cloud-procurement-workshop-' + new Date().toISOString().slice(0, 10) + '.txt';
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+
+        async function fetchAndPopulate() {
+            const urlInput = document.getElementById('dmUrlInput');
+            const url = urlInput?.value?.trim();
+            const statusEl = document.getElementById('fetchDmStatus');
+            const btn = document.getElementById('fetchDmBtn');
+            if (!url) { if (statusEl) statusEl.textContent = 'Paste a URL first'; return; }
+            if (statusEl) statusEl.textContent = 'Fetching service details…';
+            if (btn) btn.disabled = true;
+
+            try {
+                const apiBase = window.location.origin;
+                const res = await fetch(apiBase + '/api/fetch-dm', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Failed');
+
+                const nameEl = document.getElementById('offeringName');
+                const provEl = document.getElementById('offeringProvider');
+                if (nameEl) nameEl.textContent = data.productName || '—';
+                if (provEl) provEl.textContent = data.supplier || '—';
+                const typeDisplay = document.getElementById('serviceTypeDisplay');
+                const typeLabels = { saas: 'SaaS', paas: 'PaaS', iaas: 'IaaS', support: 'Support' };
+                if (typeDisplay) typeDisplay.textContent = data.serviceType ? (typeLabels[data.serviceType] || data.serviceType) : '—';
+                lastFetchedFramework = (data.framework || '').toLowerCase();
+                cachedScoreHints = data.scoreHints || {};
+                updateOfferingLabel();
+                applyAutoScore();
+                updateEvalProgress();
+                if (statusEl) statusEl.textContent = 'Done. Review the scores.';
+            } catch (e) {
+                if (statusEl) statusEl.textContent = 'Error: ' + (e.message || 'Failed');
+                cachedScoreHints = {};
+                lastFetchedFramework = '';
+                const td = document.getElementById('serviceTypeDisplay');
+                if (td) td.textContent = '—';
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateOfferingLabel();
+            updateEvalProgress();
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/govuk-frontend@5.9.0/dist/govuk/govuk-frontend.min.js"></script>
+    <script>document.addEventListener('DOMContentLoaded', function(){ if (window.GOVUKFrontend) GOVUKFrontend.initAll(); });</script>
+</body>
+</html>
