@@ -76,25 +76,27 @@ function inferFramework(text) {
 function ruleBasedScoreHints(fullText) {
   const t = (fullText || '').toLowerCase();
   const hints = {};
-  if (/\b(net zero|carbon|climate|sustainability|iso14001|environmental)\b/.test(t))
-    hints.netZero = '3';
-  if (/\b(gdpr|ncsc|iso.?27001|cyber essentials|security clearance)\b/.test(t))
+  // Vision 2027 themes
+  if (/\b(citizen|resident|customer|user|accessibility|public.?facing)\b/.test(t))
+    hints.customers = '3';
+  if (/\b(digital|transform|cloud|automation|modern|api|integration)\b/.test(t))
+    hints.digitalTransform = '3';
+  if (/\b(governance|compliance|gdpr|audit|security clearance)\b/.test(t))
+    hints.leadership = '3';
+  if (/\b(cost|pricing|savings|value.?for.?money|pay.?as.?you.?go)\b/.test(t))
+    hints.spendControl = '3';
+  if (/\b(training|support|documentation|skills|resources|onboarding)\b/.test(t))
+    hints.skills = '3';
+  if (/\b(net zero|carbon|sustainability|ethical|environmental|iso14001)\b/.test(t))
+    hints.sustainable = '3';
+  // WPPS criteria
+  if (/\b(gdpr|ncsc|iso.?27001|cyber essentials)\b/.test(t))
     hints.compliance = '3';
-  if (/\b(citizen|resident|public|customer.?centric)\b/.test(t))
-    hints.citizenCentric = '3';
-  if (/\b(collaboration|shared|integration|api|interoperability)\b/.test(t))
-    hints.collaboration = '3';
-  if (/\b(efficiency|automation|dashboards|reporting)\b/.test(t))
-    hints.efficiency = '3';
-  if (/\b(resilience|availability|redundancy|backup|recovery)\b/.test(t))
-    hints.resilience = '3';
-  if (/\b(innovation|modern|flexible|customis)\b/.test(t))
-    hints.innovation = '3';
   if (/\b(data.?portability|data.?extract|exit|lock.?in)\b/.test(t))
     hints.delivery = '3';
   if (/\b(social value|local|sme|disability|inclusive)\b/.test(t))
     hints.social = '3';
-  if (/\b(fair work|equal opportunit|ethical|transparency|workplace adjustment)\b/.test(t))
+  if (/\b(fair work|equal opportunit|transparency|workplace adjustment)\b/.test(t))
     hints.fairWork = '3';
   return hints;
 }
